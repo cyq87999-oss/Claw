@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>图生视频分镜提示词生成器 · I2V Storyboard</title>
+<style>
+  :root{
+    --bg:#0c0e14; --panel:#141824; --panel-2:#1b2030; --line:#2a3142;
+    --txt:#e7ecf5; --muted:#9aa6bd; --accent:#5eead4; --accent-2:#a78bfa;
+    --warn:#fbbf24; --danger:#f87171; --ok:#34d399; --radius:12px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",
+    "PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--txt);
+    line-height:1.55;font-size:14px}
+  header{padding:22px 26px;border-bottom:1px solid var(--line);
+    background:linear-gradient(90deg,#141824,#0c0e14)}
+  header h1{margin:0;font-size:20px;letter-spacing:.5px}
+  header p{margin:6px 0 0;color:var(--muted);font-size:13px}
+  .wrap{max-width:1240px;margin:0 auto;padding:20px 26px 60px}
+  .tabs{display:flex;gap:8px;margin:18px 0}
+  .tab{padding:9px 18px;border:1px solid var(--line);background:var(--panel);
+    color:var(--muted);border-radius:999px;cursor:pointer;font-size:13px}
+  .tab.active{background:var(--accent);color:#06231e;border-color:var(--accent);font-weight:600}
+  .layout{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:900px){.layout{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+  .card h2{margin:0 0 12px;font-size:15px;color:var(--accent)}
+  .field{margin-bottom:12px}
+  .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+  .field label b{color:var(--txt)}
+  textarea,input,select{width:100%;background:var(--panel-2);border:1px solid var(--line);
+    color:var(--txt);border-radius:8px;padding:9px 11px;font-size:13px;font-family:inherit;resize:vertical}
+  textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .presets{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .preset{padding:6px 12px;border:1px solid var(--line);background:var(--panel-2);
+    border-radius:999px;cursor:pointer;font-size:12px;color:var(--muted)}
+  .preset:hover{border-color:var(--accent-2);color:var(--txt)}
+  .preview{background:#0a0c12;border:1px solid var(--line);border-radius:8px;
+    padding:14px;white-space:pre-wrap;min-height:220px;font-size:13.5px;color:#d7e3f4}
+  .btn{padding:9px 16px;border:none;border-radius:8px;cursor:pointer;font-size:13px;
+    background:var(--accent);color:#06231e;font-weight:600}
+  .btn.ghost{background:var(--panel-2);color:var(--txt);border:1px solid var(--line)}
+  .checks{margin-top:12px;font-size:12.5px}
+  .check{display:flex;gap:8px;align-items:flex-start;padding:4px 0;color:var(--ok)}
+  .check.bad{color:var(--warn)}
+  .check .ic{flex:0 0 auto}
+  .shot{border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px;background:var(--panel-2)}
+  .shot .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .shot .head b{color:var(--accent-2)}
+  .del{background:transparent;border:1px solid var(--danger);color:var(--danger);
+    border-radius:6px;padding:3px 10px;cursor:pointer;font-size:12px}
+  .add{margin-top:6px}
+  .hint{font-size:11.5px;color:var(--muted);margin-top:4px}
+  .ref-toggle{cursor:pointer;color:var(--accent-2);font-size:12px;user-select:none}
+  details{margin-top:8px}
+  details summary{cursor:pointer;color:var(--muted);font-size:12.5px}
+  .pill{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;
+    background:var(--panel-2);border:1px solid var(--line);color:var(--muted);margin:2px}
+</style>
+</head>
+<body>
+<header>
+  <h1>图生视频分镜提示词生成器</h1>
+  <p>I2V Storyboard Prompt · 竖屏 9:16 · 10 要素强制骨架 + 竖屏附加逻辑</p>
+</header>
+
+<div class="wrap">
+  <div class="tabs">
+    <div class="tab active" data-tab="single">单镜生成</div>
+    <div class="tab" data-tab="seq">多镜序列</div>
+  </div>
+
+  <!-- 单镜 -->
+  <div id="single" class="tabpanel">
+    <div class="presets">
+      <span style="color:var(--muted);font-size:12px;align-self:center">风格预设：</span>
+      <span class="preset" data-preset="guofeng">国风漫剧</span>
+      <span class="preset" data-preset="houqi">厚涂动漫</span>
+      <span class="preset" data-preset="render3d">3D 渲染</span>
+      <span class="preset" data-preset="xieshi">写实电影</span>
+    </div>
+    <div class="layout">
+      <div class="card">
+        <h2>10 要素表单</h2>
+        <div class="field"><label><b>1. 主体锁定</b> 外貌/服装/位置/朝向</label>
+          <textarea id="s_subject" rows="2" placeholder="如：黑发及腰、左眼角泪痣的年轻女子，墨色交领长袍，正对镜头立于画面中下"></textarea></div>
+        <div class="field"><label><b>2. 动作描述</b> 动作/幅度/方向/速度</label>
+          <textarea id="s_action" rows="2" placeholder="如：右手缓缓握剑柄由鞘中抽出，匀速小幅"></textarea></div>
+        <div class="field"><label><b>3. 镜头运动</b> 推拉摇移跟升降旋转（适配竖屏）</label>
+          <textarea id="s_camera" rows="2" placeholder="如：镜头从胸口缓慢上摇至面部特写"></textarea></div>
+        <div class="field"><label><b>4. 景别与构图</b> 特写/近景/中景/全景 · 居中或三分线 · 头顶留白</label>
+          <textarea id="s_shot" rows="2" placeholder="如：特写，面部占70%，头顶留白，居中"></textarea></div>
+        <div class="field"><label><b>5. 光影氛围</b> 光源/色调/明暗/时间天气</label>
+          <textarea id="s_lighting" rows="2" placeholder="如：冷蓝逆光，雨夜，湿地面霓虹反射，高对比"></textarea></div>
+        <div class="field"><label><b>6. 风格一致性</b> 画风/材质/质量词</label>
+          <textarea id="s_style" rows="2" placeholder="如：国风漫剧、厚涂笔触、电影感、细节丰富"></textarea></div>
+        <div class="field"><label><b>7. 节奏与时长</b> 单镜秒数/转场节奏</label>
+          <textarea id="s_rhythm" rows="2" placeholder="如：本镜4秒，前1秒给眼神特写钩子"></textarea></div>
+        <div class="field"><label><b>8. 空间关系</b> 前后景/景深/遮挡防穿模</label>
+          <textarea id="s_spatial" rows="2" placeholder="如：前景雨丝虚化，人物中景清晰，不穿模"></textarea></div>
+        <div class="field"><label><b>9. 首尾帧约束</b> 起始帧 / 结束帧（可留空）</label>
+          <textarea id="s_frames" rows="2" placeholder="如：起始帧人物静立扶剑；结束帧剑已出鞘横于胸前抬眼"></textarea></div>
+        <div class="field"><label><b>10. 负面提示词</b>（留空用默认词库）</label>
+          <textarea id="s_negative" rows="2" placeholder="如：模糊、变形、手指异常、字幕水印、低质量"></textarea></div>
+        <span class="ref-toggle" id="refToggle">＋ 参考图 / 首帧说明（可选）</span>
+        <div id="refBox" style="display:none;margin-top:8px">
+          <textarea id="s_ref" rows="2" placeholder="如：参考图=黑发女子墨袍持剑静立图；以该图为首帧"></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>实时预览</h2>
+        <div class="preview" id="s_preview"></div>
+        <div class="row" style="margin-top:12px">
+          <button class="btn" id="s_copy">复制提示词</button>
+          <button class="btn ghost" id="s_copyEn">复制英文负面词</button>
+        </div>
+        <div class="checks" id="s_checks"></div>
+        <details>
+          <summary>词库速查（镜头/景别/光影/负面）</summary>
+          <div style="margin-top:8px;font-size:12px;color:var(--muted)">
+            <b style="color:var(--txt)">镜头运动：</b>
+            <span class="pill">推</span><span class="pill">拉</span><span class="pill">横摇</span><span class="pill">上摇</span><span class="pill">下摇</span><span class="pill">移</span><span class="pill">跟</span><span class="pill">升降</span><span class="pill">环绕旋转</span>
+            <br><b style="color:var(--txt)">景别：</b>
+            <span class="pill">特写</span><span class="pill">近景</span><span class="pill">中景</span><span class="pill">全景</span><span class="pill">远景</span>
+            <br><b style="color:var(--txt)">光影：</b>
+            <span class="pill">冷蓝逆光</span><span class="pill">暖橙侧光</span><span class="pill">顶光</span><span class="pill">轮廓光</span><span class="pill">雨夜</span><span class="pill">黄昏</span><span class="pill">雾晨</span>
+            <br><b style="color:var(--txt)">默认负面：</b>模糊、变形、多余肢体、手指异常、面部畸变、字幕、水印、风格跳变、穿模、过曝、抽帧
+          </div>
+        </details>
+      </div>
+    </div>
+  </div>
+
+  <!-- 多镜序列 -->
+  <div id="seq" class="tabpanel" style="display:none">
+    <div class="card">
+      <h2>多镜序列（首尾帧自动衔接）</h2>
+      <div id="shots"></div>
+      <button class="btn ghost add" id="addShot">＋ 添加一镜</button>
+      <div class="row" style="margin-top:16px">
+        <button class="btn" id="seq_copy">复制全部提示词</button>
+      </div>
+      <div class="preview" id="seq_preview" style="margin-top:12px"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const EN_NEG = "blurry, lowres, deformed, distorted, extra limbs, missing limbs, bad hands, bad fingers, mutated face, text, watermark, logo, signature, inconsistent style, low quality, overexposed, flickering, jitter, clipping, floating object";
+const DEFAULT_NEG = ["模糊","变形","多余肢体","缺失肢体","手指异常","面部畸变","字幕","水印","风格跳变","低质量","过曝","死黑","穿模","抽帧"];
+
+const PRESETS = {
+  guofeng:{style:"国风漫剧、厚涂笔触、电影感、细节丰富、统一美术风格"},
+  houqi:{style:"厚涂、日式动漫、赛璐璐、电影感、统一美术风格"},
+  render3d:{style:"3D 渲染、虚幻引擎风格、光线追踪、电影级调色、8K"},
+  xieshi:{style:"写实、胶片感、电影级调色、细节丰富、高质感"}
+};
+
+const $ = id => document.getElementById(id);
+function val(id){return ($(id).value||"").trim();}
+
+function assemble(d, vertical=true){
+  const frames = d.frames ? d.frames : "无强制首尾帧约束，以参考图为首帧。";
+  const negList = d.negative ? d.negative.split(/[，,、]/).map(s=>s.trim()).filter(Boolean) : DEFAULT_NEG;
+  const negStr = negList.join("、");
+  let p = "";
+  p += `（主体锁定）${d.subject}\n`;
+  p += `（动作描述）${d.action}\n`;
+  p += `（镜头运动）${d.camera}\n`;
+  p += `（景别/构图）${d.shot}\n`;
+  p += `（光影氛围）${d.lighting}\n`;
+  p += `（风格一致性）${d.style}\n`;
+  p += `（节奏与时长）${d.rhythm}\n`;
+  p += `（空间关系）${d.spatial}\n`;
+  p += `（首尾帧约束）${frames}\n`;
+  p += `（负面提示词）排除${negStr}。`;
+  if(vertical) p += "\n[竖屏附加逻辑已应用：人物不贴边、动作纵向优先、开篇强钩子、中心安全区构图。]";
+  return {prompt:p, negStr, negEn:EN_NEG};
+}
+
+function verticalChecks(d){
+  const checks=[];
+  const sub = d.subject||"";
+  checks.push({
+    ok: /居中|中下|中上|中心|三分/.test(sub),
+    msg:"主体锁定需注明画面位置（居中/中下/三分线），避免贴边"
+  });
+  const rhythm = d.rhythm||"";
+  checks.push({
+    ok: /秒/.test(rhythm),
+    msg:"节奏与时长建议标注秒数（竖屏单镜 3–6 秒）"
+  });
+  const shot = d.shot||"";
+  checks.push({
+    ok: /留白/.test(shot) || /特写/.test(shot),
+    msg:"景别/构图建议写明头顶留白（10–15%）"
+  });
+  return checks;
+}
+
+function renderSingle(){
+  const d={
+    subject:val("s_subject"), action:val("s_action"), camera:val("s_camera"),
+    shot:val("s_shot"), lighting:val("s_lighting"), style:val("s_style"),
+    rhythm:val("s_rhythm"), spatial:val("s_spatial"), frames:val("s_frames"),
+    negative:val("s_negative")
+  };
+  const {prompt,negEn}=assemble(d);
+  const ref = val("s_ref");
+  $("s_preview").textContent = (ref?("参考："+ref+"\n\n"):"") + prompt;
+  // checks
+  const box=$("s_checks"); box.innerHTML="";
+  verticalChecks(d).forEach(c=>{
+    const el=document.createElement("div");
+    el.className="check"+(c.ok?"":" bad");
+    el.innerHTML=`<span class="ic">${c.ok?"✓":"⚠"}</span><span>${c.msg}</span>`;
+    box.appendChild(el);
+  });
+  return {prompt,negEn,negCn:d.negative};
+}
+
+["s_subject","s_action","s_camera","s_shot","s_lighting","s_style","s_rhythm","s_spatial","s_frames","s_negative","s_ref"]
+  .forEach(id=>$(id).addEventListener("input",renderSingle));
+
+document.querySelectorAll(".preset").forEach(p=>{
+  p.addEventListener("click",()=>{
+    const pre=PRESETS[p.dataset.preset];
+    if(pre) $("s_style").value=pre.style;
+    renderSingle();
+  });
+});
+$("refToggle").addEventListener("click",()=>{
+  const b=$("refBox"); b.style.display = b.style.display==="none"?"block":"none";
+});
+$("s_copy").addEventListener("click",()=>{
+  renderSingle();
+  navigator.clipboard.writeText($("s_preview").textContent).then(()=>alert("已复制提示词"));
+});
+$("s_copyEn").addEventListener("click",()=>{
+  navigator.clipboard.writeText(EN_NEG).then(()=>alert("已复制英文负面词"));
+});
+
+// tabs
+document.querySelectorAll(".tab").forEach(t=>{
+  t.addEventListener("click",()=>{
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+    t.classList.add("active");
+    const which=t.dataset.tab;
+    $("single").style.display = which==="single"?"block":"none";
+    $("seq").style.display = which==="seq"?"block":"none";
+  });
+});
+
+// sequence
+let shotCount=0;
+function addShot(prefill){
+  shotCount++;
+  const id="shot"+shotCount;
+  const wrap=document.createElement("div");
+  wrap.className="shot"; wrap.id=id;
+  wrap.innerHTML=`
+    <div class="head"><b>镜 ${shotCount}</b><button class="del" data-target="${id}">删除</button></div>
+    <div class="field"><label>主体锁定</label><textarea class="f_subject" rows="2"></textarea></div>
+    <div class="field"><label>动作描述</label><textarea class="f_action" rows="2"></textarea></div>
+    <div class="field"><label>镜头运动</label><textarea class="f_camera" rows="2"></textarea></div>
+    <div class="field"><label>景别/构图</label><textarea class="f_shot" rows="2"></textarea></div>
+    <div class="field"><label>光影氛围</label><textarea class="f_lighting" rows="2"></textarea></div>
+    <div class="field"><label>风格一致性</label><textarea class="f_style" rows="2"></textarea></div>
+    <div class="field"><label>节奏与时长</label><textarea class="f_rhythm" rows="2"></textarea></div>
+    <div class="field"><label>空间关系</label><textarea class="f_spatial" rows="2"></textarea></div>
+    <div class="row">
+      <div class="field" style="flex:1"><label>起始帧</label><textarea class="f_start" rows="2"></textarea></div>
+      <div class="field" style="flex:1"><label>结束帧</label><textarea class="f_end" rows="2"></textarea></div>
+    </div>
+    <div class="field"><label>负面提示词（留空用默认）</label><textarea class="f_negative" rows="1"></textarea></div>`;
+  $("shots").appendChild(wrap);
+  if(prefill){
+    wrap.querySelector(".f_subject").value=prefill.subject||"";
+    wrap.querySelector(".f_style").value=prefill.style||"";
+  }
+  wrap.querySelectorAll("textarea").forEach(t=>t.addEventListener("input",renderSeq));
+  wrap.querySelector(".del").addEventListener("click",e=>{
+    $(e.target.dataset.target).remove(); renderSeq();
+  });
+  renderSeq();
+}
+function readShots(){
+  const list=[];
+  document.querySelectorAll(".shot").forEach(s=>{
+    list.push({
+      subject:s.querySelector(".f_subject").value.trim(),
+      action:s.querySelector(".f_action").value.trim(),
+      camera:s.querySelector(".f_camera").value.trim(),
+      shot:s.querySelector(".f_shot").value.trim(),
+      lighting:s.querySelector(".f_lighting").value.trim(),
+      style:s.querySelector(".f_style").value.trim(),
+      rhythm:s.querySelector(".f_rhythm").value.trim(),
+      spatial:s.querySelector(".f_spatial").value.trim(),
+      start:s.querySelector(".f_start").value.trim(),
+      end:s.querySelector(".f_end").value.trim(),
+      negative:s.querySelector(".f_negative").value.trim()
+    });
+  });
+  return list;
+}
+function renderSeq(){
+  const shots=readShots();
+  let out="";
+  shots.forEach((d,i)=>{
+    const prevEnd = i>0 ? shots[i-1].end : "";
+    let frames;
+    if(d.start && d.end) frames=`起始帧：${d.start}；结束帧：${d.end}`;
+    else if(prevEnd) frames=`起始帧承接上一镜结束（${prevEnd}）`+(d.end?`；结束帧：${d.end}`:"") ;
+    else frames="无强制首尾帧约束，以参考图为首帧。";
+    const r=assemble({...d, frames}, true);
+    out += `=== 镜 ${i+1} ===\n${r.prompt}\n\n`;
+  });
+  $("seq_preview").textContent = out.trim();
+}
+$("addShot").addEventListener("click",()=>addShot());
+$("seq_copy").addEventListener("click",()=>{
+  navigator.clipboard.writeText($("seq_preview").textContent).then(()=>alert("已复制全部提示词"));
+});
+
+// init
+addShot({subject:"黑发及腰、左眼角泪痣的年轻女子，墨色交领长袍，正对镜头立于画面中下",
+  style:"国风漫剧、厚涂笔触、电影感、细节丰富、统一美术风格"});
+renderSingle();
+</script>
+</body>
+</html>
