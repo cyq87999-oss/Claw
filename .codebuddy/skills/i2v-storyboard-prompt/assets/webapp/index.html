@@ -99,6 +99,7 @@
       <select id="ai_preset">
         <option value="">服务商预设（选一个自动填 Base/模型）</option>
         <option value="openai">OpenAI · api.openai.com</option>
+        <option value="deepseek" selected>DeepSeek · api.deepseek.com（默认）</option>
         <option value="deepseek">DeepSeek · api.deepseek.com</option>
         <option value="qwen">通义千问 · dashscope</option>
         <option value="moonshot">Kimi/月之暗面 · moonshot.cn</option>
@@ -1034,6 +1035,7 @@ $("s_aiCopy").addEventListener("click",()=>{ navigator.clipboard.writeText($("s_
 $("f_aiCopy").addEventListener("click",()=>{ navigator.clipboard.writeText($("f_aiOut").value).then(()=>alert("已复制 AI 输出")); });
 ["ai_base","ai_key","ai_model"].forEach(id=>$(id).addEventListener("input",saveAiConf));
 (function loadAiConf(){ const c=aiConf(); if(c.base)$("ai_base").value=c.base; if(c.key)$("ai_key").value=c.key; if(c.model)$("ai_model").value=c.model; })();
+(function initPreset(){ if(!localStorage.getItem("ai_base")){ const sel=$("ai_preset"); sel.value="deepseek"; sel.dispatchEvent(new Event("change")); } })();
 const AI_PRESETS={
   openai:{base:"https://api.openai.com/v1",model:"gpt-4o-mini"},
   deepseek:{base:"https://api.deepseek.com",model:"deepseek-chat"},
