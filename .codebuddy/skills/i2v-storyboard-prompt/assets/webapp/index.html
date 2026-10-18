@@ -8,7 +8,7 @@
   :root{
     --bg:#0c0e14; --panel:#141824; --panel-2:#1b2030; --line:#2a3142;
     --txt:#e7ecf5; --muted:#9aa6bd; --accent:#5eead4; --accent-2:#a78bfa;
-    --warn:#fbbf24; --danger:#f87171; --ok:#34d399; --radius:12px;
+    --warn:#fbbf24; --ok:#34d399; --radius:12px;
   }
   *{box-sizing:border-box}
   body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",
@@ -33,8 +33,7 @@
   textarea,input,select{width:100%;background:var(--panel-2);border:1px solid var(--line);
     color:var(--txt);border-radius:8px;padding:9px 11px;font-size:13px;font-family:inherit;resize:vertical}
   textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
-  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-  .presets{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .presets{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
   .preset{padding:6px 12px;border:1px solid var(--line);background:var(--panel-2);
     border-radius:999px;cursor:pointer;font-size:12px;color:var(--muted)}
   .preset:hover{border-color:var(--accent-2);color:var(--txt)}
@@ -59,12 +58,24 @@
   details summary{cursor:pointer;color:var(--muted);font-size:12.5px}
   .pill{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;
     background:var(--panel-2);border:1px solid var(--line);color:var(--muted);margin:2px}
+  .plot-box{background:var(--panel-2);border:1px dashed var(--accent-2);border-radius:8px;
+    padding:10px 12px;margin-bottom:14px}
+  .plot-box label{color:var(--accent-2);font-size:12px;font-weight:600}
+  .img-row{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+  .img-row .ir_role{width:84px;flex:0 0 auto}
+  .img-row .ir_file{flex:1 1 40%}
+  .img-row .ir_cap{flex:1 1 45%}
+  .img-row .ir_del{flex:0 0 auto;background:transparent;border:1px solid var(--danger);
+    color:var(--danger);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:12px}
+  .img-head{display:flex;justify-content:space-between;align-items:center;margin:10px 0 6px}
+  .img-head span{font-size:12px;color:var(--muted)}
+  .img-head .cnt{color:var(--accent-2)}
 </style>
 </head>
 <body>
 <header>
   <h1>图生视频分镜提示词生成器</h1>
-  <p>I2V Storyboard Prompt · 竖屏 9:16 · 10 要素强制骨架 + 竖屏附加逻辑</p>
+  <p>I2V Storyboard Prompt · 竖屏 9:16 · 10 要素 + 竖屏逻辑 + 剧情层 + 1–10 张分镜图</p>
 </header>
 
 <div class="wrap">
@@ -76,12 +87,18 @@
   <!-- 单镜 -->
   <div id="single" class="tabpanel">
     <div class="presets">
-      <span style="color:var(--muted);font-size:12px;align-self:center">风格预设：</span>
+      <span style="color:var(--muted);font-size:12px;">风格预设：</span>
       <span class="preset" data-preset="guofeng">国风漫剧</span>
       <span class="preset" data-preset="houqi">厚涂动漫</span>
       <span class="preset" data-preset="render3d">3D 渲染</span>
       <span class="preset" data-preset="xieshi">写实电影</span>
     </div>
+
+    <div class="plot-box">
+      <label>剧情提示词（可选 · 一句话梗概，置于序列顶部）</label>
+      <textarea id="s_plot" rows="2" placeholder="如：少女为复仇潜入雨夜古堡，三镜内完成拔剑对峙。"></textarea>
+    </div>
+
     <div class="layout">
       <div class="card">
         <h2>10 要素表单</h2>
@@ -105,7 +122,12 @@
           <textarea id="s_frames" rows="2" placeholder="如：起始帧人物静立扶剑；结束帧剑已出鞘横于胸前抬眼"></textarea></div>
         <div class="field"><label><b>10. 负面提示词</b>（留空用默认词库）</label>
           <textarea id="s_negative" rows="2" placeholder="如：模糊、变形、手指异常、字幕水印、低质量"></textarea></div>
-        <span class="ref-toggle" id="refToggle">＋ 参考图 / 首帧说明（可选）</span>
+
+        <div class="img-head"><span>分镜图（首帧/尾帧/参考，最多 10 张）</span><span class="cnt" id="s_imgcnt">0/10</span></div>
+        <div id="s_imgs"></div>
+        <button class="btn ghost add" id="s_addImg" style="font-size:12px;padding:6px 12px">＋ 添加分镜图</button>
+
+        <span class="ref-toggle" id="refToggle" style="display:inline-block;margin-top:10px">＋ 参考图 / 首帧说明（可选文本）</span>
         <div id="refBox" style="display:none;margin-top:8px">
           <textarea id="s_ref" rows="2" placeholder="如：参考图=黑发女子墨袍持剑静立图；以该图为首帧"></textarea>
         </div>
@@ -138,7 +160,11 @@
   <!-- 多镜序列 -->
   <div id="seq" class="tabpanel" style="display:none">
     <div class="card">
-      <h2>多镜序列（首尾帧自动衔接）</h2>
+      <h2>多镜序列（剧情层 + 首尾帧自动衔接 + 每镜分镜图）</h2>
+      <div class="plot-box">
+        <label>剧情提示词（可选 · 一句话梗概，置于整个序列顶部）</label>
+        <textarea id="seq_plot" rows="2" placeholder="如：少女为复仇潜入雨夜古堡，三镜内完成拔剑对峙。"></textarea>
+      </div>
       <div id="shots"></div>
       <button class="btn ghost add" id="addShot">＋ 添加一镜</button>
       <div class="row" style="margin-top:16px">
@@ -162,6 +188,7 @@ const PRESETS = {
 
 const $ = id => document.getElementById(id);
 function val(id){return ($(id).value||"").trim();}
+const MAX_IMG = 10;
 
 function assemble(d, vertical=true){
   const frames = d.frames ? d.frames : "无强制首尾帧约束，以参考图为首帧。";
@@ -182,26 +209,62 @@ function assemble(d, vertical=true){
   return {prompt:p, negStr, negEn:EN_NEG};
 }
 
+// wrap with plot + images
+function assembleExt(d, plot, images, vertical=true){
+  const r = assemble(d, vertical);
+  let p = r.prompt;
+  if(plot) p = `【剧情】${plot}\n\n` + p;
+  if(images && images.length){
+    const lines = ["【分镜图上传】"];
+    images.forEach(im=>lines.push(`  - （${im.role}）${im.cap}`+(im.file?`（文件：${im.file}）`:"")));
+    p += "\n" + lines.join("\n");
+  }
+  return {prompt:p, negEn:r.negEn};
+}
+
 function verticalChecks(d){
   const checks=[];
-  const sub = d.subject||"";
-  checks.push({
-    ok: /居中|中下|中上|中心|三分/.test(sub),
-    msg:"主体锁定需注明画面位置（居中/中下/三分线），避免贴边"
-  });
-  const rhythm = d.rhythm||"";
-  checks.push({
-    ok: /秒/.test(rhythm),
-    msg:"节奏与时长建议标注秒数（竖屏单镜 3–6 秒）"
-  });
-  const shot = d.shot||"";
-  checks.push({
-    ok: /留白/.test(shot) || /特写/.test(shot),
-    msg:"景别/构图建议写明头顶留白（10–15%）"
-  });
+  const sub=d.subject||"";
+  checks.push({ok:/居中|中下|中上|中心|三分/.test(sub),msg:"主体锁定需注明画面位置（居中/中下/三分线），避免贴边"});
+  checks.push({ok:/秒/.test(d.rhythm||""),msg:"节奏与时长建议标注秒数（竖屏单镜 3–6 秒）"});
+  checks.push({ok:/留白/.test(d.shot||"")||/特写/.test(d.shot||""),msg:"景别/构图建议写明头顶留白（10–15%）"});
   return checks;
 }
 
+// ---- image editor ----
+function readImages(container){
+  const out=[];
+  container.querySelectorAll(".img-row").forEach(row=>{
+    const role=row.querySelector(".ir_role").value;
+    const file=row.querySelector(".ir_file").dataset.file||"";
+    const cap=row.querySelector(".ir_cap").value.trim();
+    out.push({role,file,cap});
+  });
+  return out;
+}
+function addImageRow(container, updater, max=MAX_IMG){
+  if(container.querySelectorAll(".img-row").length>=max) return;
+  const row=document.createElement("div");
+  row.className="img-row";
+  row.innerHTML=`
+    <select class="ir_role"><option>首帧图</option><option>尾帧图</option><option>参考图</option></select>
+    <input type="file" class="ir_file" />
+    <input class="ir_cap" placeholder="图注/描述，如：门前景，阿绾静立" />
+    <button class="ir_del">×</button>`;
+  const fi=row.querySelector(".ir_file");
+  fi.addEventListener("change",e=>{ fi.dataset.file = e.target.files[0]?e.target.files[0].name:""; });
+  row.querySelector(".ir_del").addEventListener("click",()=>{ row.remove(); if(updater)updater(); });
+  container.appendChild(row);
+  if(updater)updater();
+}
+function setupImageEditor(containerId, btnId, cntId){
+  const c=$(containerId), btn=$(btnId), cnt=$(cntId);
+  const upd=()=>{ cnt.textContent=c.querySelectorAll(".img-row").length+"/"+MAX_IMG;
+    btn.disabled=c.querySelectorAll(".img-row").length>=MAX_IMG; };
+  btn.addEventListener("click",()=>addImageRow(c,upd));
+}
+
+// ---- single ----
 function renderSingle(){
   const d={
     subject:val("s_subject"), action:val("s_action"), camera:val("s_camera"),
@@ -209,10 +272,11 @@ function renderSingle(){
     rhythm:val("s_rhythm"), spatial:val("s_spatial"), frames:val("s_frames"),
     negative:val("s_negative")
   };
-  const {prompt,negEn}=assemble(d);
-  const ref = val("s_ref");
-  $("s_preview").textContent = (ref?("参考："+ref+"\n\n"):"") + prompt;
-  // checks
+  const plot=val("s_plot");
+  const imgs=readImages($("s_imgs"));
+  const {prompt}=assembleExt(d,plot,imgs);
+  const ref=val("s_ref");
+  $("s_preview").textContent=(ref?("参考："+ref+"\n\n"):"")+prompt;
   const box=$("s_checks"); box.innerHTML="";
   verticalChecks(d).forEach(c=>{
     const el=document.createElement("div");
@@ -220,42 +284,11 @@ function renderSingle(){
     el.innerHTML=`<span class="ic">${c.ok?"✓":"⚠"}</span><span>${c.msg}</span>`;
     box.appendChild(el);
   });
-  return {prompt,negEn,negCn:d.negative};
+  if(imgs.length>MAX_IMG){const w=document.createElement("div");w.className="check bad";
+    w.innerHTML=`<span class="ic">⚠</span><span>分镜图 ${imgs.length} 张，超过上限 ${MAX_IMG} 张，请拆分。</span>`;box.appendChild(w);}
 }
 
-["s_subject","s_action","s_camera","s_shot","s_lighting","s_style","s_rhythm","s_spatial","s_frames","s_negative","s_ref"]
-  .forEach(id=>$(id).addEventListener("input",renderSingle));
-
-document.querySelectorAll(".preset").forEach(p=>{
-  p.addEventListener("click",()=>{
-    const pre=PRESETS[p.dataset.preset];
-    if(pre) $("s_style").value=pre.style;
-    renderSingle();
-  });
-});
-$("refToggle").addEventListener("click",()=>{
-  const b=$("refBox"); b.style.display = b.style.display==="none"?"block":"none";
-});
-$("s_copy").addEventListener("click",()=>{
-  renderSingle();
-  navigator.clipboard.writeText($("s_preview").textContent).then(()=>alert("已复制提示词"));
-});
-$("s_copyEn").addEventListener("click",()=>{
-  navigator.clipboard.writeText(EN_NEG).then(()=>alert("已复制英文负面词"));
-});
-
-// tabs
-document.querySelectorAll(".tab").forEach(t=>{
-  t.addEventListener("click",()=>{
-    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
-    t.classList.add("active");
-    const which=t.dataset.tab;
-    $("single").style.display = which==="single"?"block":"none";
-    $("seq").style.display = which==="seq"?"block":"none";
-  });
-});
-
-// sequence
+// ---- sequence ----
 let shotCount=0;
 function addShot(prefill){
   shotCount++;
@@ -276,16 +309,19 @@ function addShot(prefill){
       <div class="field" style="flex:1"><label>起始帧</label><textarea class="f_start" rows="2"></textarea></div>
       <div class="field" style="flex:1"><label>结束帧</label><textarea class="f_end" rows="2"></textarea></div>
     </div>
-    <div class="field"><label>负面提示词（留空用默认）</label><textarea class="f_negative" rows="1"></textarea></div>`;
+    <div class="field"><label>负面提示词（留空用默认）</label><textarea class="f_negative" rows="1"></textarea></div>
+    <div class="img-head"><span>分镜图（最多 10 张）</span><span class="cnt">0/${MAX_IMG}</span></div>
+    <div class="f_imgs"></div>
+    <button class="btn ghost add f_addimg" style="font-size:12px;padding:6px 12px">＋ 添加分镜图</button>`;
   $("shots").appendChild(wrap);
-  if(prefill){
-    wrap.querySelector(".f_subject").value=prefill.subject||"";
-    wrap.querySelector(".f_style").value=prefill.style||"";
-  }
+  if(prefill){ wrap.querySelector(".f_subject").value=prefill.subject||"";
+    wrap.querySelector(".f_style").value=prefill.style||""; }
+  const c=wrap.querySelector(".f_imgs"), cnt=wrap.querySelector(".cnt");
+  const upd=()=>{ cnt.textContent=c.querySelectorAll(".img-row").length+"/"+MAX_IMG;
+    wrap.querySelector(".f_addimg").disabled=c.querySelectorAll(".img-row").length>=MAX_IMG; };
+  wrap.querySelector(".f_addimg").addEventListener("click",()=>addImageRow(c,upd));
   wrap.querySelectorAll("textarea").forEach(t=>t.addEventListener("input",renderSeq));
-  wrap.querySelector(".del").addEventListener("click",e=>{
-    $(e.target.dataset.target).remove(); renderSeq();
-  });
+  wrap.querySelector(".del").addEventListener("click",e=>{ $(e.target.dataset.target).remove(); renderSeq(); });
   renderSeq();
 }
 function readShots(){
@@ -302,32 +338,60 @@ function readShots(){
       spatial:s.querySelector(".f_spatial").value.trim(),
       start:s.querySelector(".f_start").value.trim(),
       end:s.querySelector(".f_end").value.trim(),
-      negative:s.querySelector(".f_negative").value.trim()
+      negative:s.querySelector(".f_negative").value.trim(),
+      images:readImages(s.querySelector(".f_imgs"))
     });
   });
   return list;
 }
 function renderSeq(){
   const shots=readShots();
+  const plot=val("seq_plot");
   let out="";
+  if(plot) out+="【剧情】"+plot+"\n\n";
   shots.forEach((d,i)=>{
-    const prevEnd = i>0 ? shots[i-1].end : "";
+    const prevEnd=i>0?shots[i-1].end:"";
     let frames;
-    if(d.start && d.end) frames=`起始帧：${d.start}；结束帧：${d.end}`;
-    else if(prevEnd) frames=`起始帧承接上一镜结束（${prevEnd}）`+(d.end?`；结束帧：${d.end}`:"") ;
+    if(d.start&&d.end) frames=`起始帧：${d.start}；结束帧：${d.end}`;
+    else if(prevEnd) frames=`起始帧承接上一镜结束（${prevEnd}）`+(d.end?`；结束帧：${d.end}`:"");
     else frames="无强制首尾帧约束，以参考图为首帧。";
-    const r=assemble({...d, frames}, true);
-    out += `=== 镜 ${i+1} ===\n${r.prompt}\n\n`;
+    const r=assemble({...d,frames},true);
+    let p=r.prompt;
+    if(d.images&&d.images.length){
+      const lines=["【分镜图上传】"];
+      d.images.forEach(im=>lines.push(`  - （${im.role}）${im.cap}`+(im.file?`（文件：${im.file}）`:"")));
+      p+="\n"+lines.join("\n");
+    }
+    out+=`=== 镜 ${i+1} ===\n${p}\n\n`;
   });
-  $("seq_preview").textContent = out.trim();
+  $("seq_preview").textContent=out.trim();
 }
-$("addShot").addEventListener("click",()=>addShot());
-$("seq_copy").addEventListener("click",()=>{
-  navigator.clipboard.writeText($("seq_preview").textContent).then(()=>alert("已复制全部提示词"));
+
+// ---- wiring ----
+["s_subject","s_action","s_camera","s_shot","s_lighting","s_style","s_rhythm","s_spatial","s_frames","s_negative","s_ref","s_plot"]
+  .forEach(id=>$(id).addEventListener("input",renderSingle));
+document.querySelectorAll(".preset").forEach(p=>{
+  p.addEventListener("click",()=>{ const pre=PRESETS[p.dataset.preset]; if(pre) $("s_style").value=pre.style; renderSingle(); });
 });
+$("refToggle").addEventListener("click",()=>{ const b=$("refBox"); b.style.display=b.style.display==="none"?"block":"none"; });
+$("s_copy").addEventListener("click",()=>{ renderSingle(); navigator.clipboard.writeText($("s_preview").textContent).then(()=>alert("已复制提示词")); });
+$("s_copyEn").addEventListener("click",()=>{ navigator.clipboard.writeText(EN_NEG).then(()=>alert("已复制英文负面词")); });
+setupImageEditor("s_imgs","s_addImg","s_imgcnt");
+
+document.querySelectorAll(".tab").forEach(t=>{
+  t.addEventListener("click",()=>{
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+    t.classList.add("active");
+    const which=t.dataset.tab;
+    $("single").style.display=which==="single"?"block":"none";
+    $("seq").style.display=which==="seq"?"block":"none";
+  });
+});
+$("addShot").addEventListener("click",()=>addShot());
+$("seq_copy").addEventListener("click",()=>{ navigator.clipboard.writeText($("seq_preview").textContent).then(()=>alert("已复制全部提示词")); });
 
 // init
-addShot({subject:"黑发及腰、左眼角泪痣的年轻女子，墨色交领长袍，正对镜头立于画面中下",
+addShot({subject:"阿绾，黑发及腰、左眼角泪痣，墨色交领长袍，正对镜头立于画面中下",
   style:"国风漫剧、厚涂笔触、电影感、细节丰富、统一美术风格"});
 renderSingle();
 </script>

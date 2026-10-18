@@ -21,7 +21,12 @@ JSON schema (all 10 fields required unless noted):
   "rhythm":   "本镜4秒，前1秒表情钩子",  # 节奏与时长
   "spatial":  "前景雨丝虚化...",          # 空间关系
   "frames":   "起始帧...结束帧...",       # 首尾帧约束 (str or {start,end})
-  "negative": ["模糊","变形",...]         # 负面提示词 (list or str)
+  "negative": ["模糊","变形",...],        # 负面提示词 (list or str)
+  "plot":    "少女为复仇潜入雨夜古堡...", # 剧情提示词层 (可选)
+  "images":  [                            # 分镜图 1-10 张 (可选)
+    {"role": "首帧图", "file": "shot01.png", "caption": "人物静立持剑"},
+    {"role": "参考图", "file": "ref.png",   "caption": "身份锁定"}
+  ]
 }
 """
 import json
@@ -111,6 +116,22 @@ def build(d, vertical=True):
     prompt = "".join(parts)
     if vertical:
         prompt += "\n[竖屏附加逻辑已应用：人物不贴边、动作纵向优先、开篇强钩子、中心安全区构图。]"
+
+    # plot layer (剧情提示词) — prepend once
+    plot = str(d.get("plot", "")).strip()
+    if plot:
+        prompt = f"【剧情】{plot}\n\n" + prompt
+
+    # storyboard images (1-10 张) — append upload map
+    imgs = d.get("images") or []
+    if imgs:
+        lines = ["【分镜图上传】"]
+        for im in imgs:
+            role = im.get("role", "参考图")
+            file = im.get("file", "")
+            cap = im.get("caption", "")
+            lines.append(f"  - （{role}）{cap}" + (f"（文件：{file}）" if file else ""))
+        prompt += "\n" + "\n".join(lines)
     return prompt, negative
 
 
@@ -125,6 +146,9 @@ def main():
     d = load_data(path)
     prompt, cn_neg = build(d, vertical)
     warns = vertical_warnings(d) if vertical else []
+    imgs = d.get("images") or []
+    if len(imgs) > 10:
+        warns.append(f"分镜图共 {len(imgs)} 张，超过建议上限 10 张，请拆分或精简。")
 
     out = []
     if d.get("label"):
