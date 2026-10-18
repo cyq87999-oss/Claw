@@ -1002,7 +1002,7 @@ function remoteUrls(c){
   }
   return [direct];
 }
-async function runAi(scene,fmt,statusEl,textOutEl,map,renderFn,jsonOutKey,img){
+async function runAi(scene,fmt,statusEl,textOutEl,map,renderFn,jsonOutKey,imgs){
   const cfg=AI_FMTS[fmt]||AI_FMTS.single10; if(!cfg) return;
   const c=aiConf(); const local=/localhost|127\.0\.0\.1/.test(c.base);
   if(!c.key && !local){ alert("请先在「AI 联网设置」里填写 API Key（本地 Ollama 可留空）"); return; }
@@ -1010,14 +1010,15 @@ async function runAi(scene,fmt,statusEl,textOutEl,map,renderFn,jsonOutKey,img){
   let txt=""; let imgNote="";
   try{
     if(local){
-      const mk=im=>{ const u={role:"user",content:scene}; if(im){ const b64=String(im).replace(/^data:.*;base64,/,""); u.images=[b64]; } return u; };
-      let r=await ollamaLocalChat(c.model,[{role:"system",content:cfg.sys},mk(img)],cfg.json);
-      if(!r.ok && img){ r=await ollamaLocalChat(c.model,[{role:"system",content:cfg.sys},mk("")],cfg.json); if(r.ok) imgNote="（模型未能读取图片，已仅按剧情生成）"; }
+      const hasImg=imgs&&imgs.length;
+      const mk=ims=>{ const u={role:"user",content:scene}; if(ims&&ims.length){ u.images=ims.map(s=>String(s).replace(/^data:.*;base64,/,"")); } return u; };
+      let r=await ollamaLocalChat(c.model,[{role:"system",content:cfg.sys},mk(imgs)],cfg.json);
+      if(!r.ok && hasImg){ r=await ollamaLocalChat(c.model,[{role:"system",content:cfg.sys},mk([])],cfg.json); if(r.ok) imgNote="（模型未能读取图片，已仅按剧情生成）"; }
       if(!r.ok) throw new Error(r.err);
       const j=r.j;
       txt=(j.message?j.message.content:"")||"";
     } else {
-      const uContent=img?[{type:"text",text:scene},{type:"image_url",image_url:{url:img}}]:scene;
+      const uContent=(imgs&&imgs.length)?[{type:"text",text:scene}].concat(imgs.map(s=>({type:"image_url",image_url:{url:s}}))):scene;
       const reqBody={model:c.model,messages:[{role:"system",content:cfg.sys},{role:"user",content:uContent}],temperature:0.8};
       if(cfg.json) reqBody.response_format={type:"json_object"};
       if(/ollama\.com/i.test(c.base)) reqBody.max_tokens=4000;
@@ -1227,12 +1228,13 @@ function plotAddCard(beat,prompt){
     '</div>'+
     '<label style="font-size:11px;color:var(--muted)">分镜剧情（这一镜讲什么）</label>'+
     '<textarea class="p_beat" rows="2" style="width:100%;margin:4px 0;background:#0a0c12;color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:8px;font-size:12px;font-family:inherit">'+escapeHtml(beat)+'</textarea>'+
-    '<div class="p_imgbox" style="margin:6px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
-      '<label class="btn ghost p_imgbtn" style="font-size:11px;padding:4px 10px;cursor:pointer;margin:0">🖼 分镜图</label>'+
-      '<input type="file" accept="image/*" class="p_img" style="display:none">'+
-      '<button class="btn ghost p_imgclear" style="display:none;font-size:11px;padding:3px 8px">清除</button>'+
-      '<span class="p_imgname" style="font-size:11px;color:var(--muted)"></span>'+
-      '<img class="p_imgprev" style="display:none;max-width:110px;max-height:80px;border-radius:6px;border:1px solid var(--line);object-fit:cover" />'+
+    '<div class="p_imgbox" style="margin:6px 0">'+
+      '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
+        '<label class="btn ghost p_imgadd" style="font-size:11px;padding:4px 10px;cursor:pointer;margin:0">🖼 添加分镜图（最多5张）</label>'+
+        '<input type="file" accept="image/*" class="p_img" style="display:none" multiple>'+
+        '<span class="p_imginfo" style="font-size:11px;color:var(--muted)"></span>'+
+      '</div>'+
+      '<div class="p_imgs" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"></div>'+
     '</div>'+
     '<div style="display:flex;gap:8px;margin:4px 0">'+
       '<button class="btn p_gen" style="font-size:12px;padding:5px 12px">AI 生成提示词</button>'+
@@ -1243,20 +1245,32 @@ function plotAddCard(beat,prompt){
   wrap.appendChild(card);
   card.querySelector(".p_del").addEventListener("click",()=>{ card.remove(); plotRenumber(); });
   card.querySelector(".p_gen").addEventListener("click",()=>plotGenCard(card));
-  const pImgBtn=card.querySelector(".p_imgbtn"), pImg=card.querySelector(".p_img"),
-        pImgPrev=card.querySelector(".p_imgprev"), pImgName=card.querySelector(".p_imgname"),
-        pImgClear=card.querySelector(".p_imgclear");
-  pImgBtn.addEventListener("click",()=>pImg.click());
+  const pImgAdd=card.querySelector(".p_imgadd"), pImg=card.querySelector(".p_img"),
+        pImgs=card.querySelector(".p_imgs"), pInfo=card.querySelector(".p_imginfo");
+  if(!card._imgs) card._imgs=[];
+  function renderImgs(){
+    pImgs.innerHTML="";
+    card._imgs.forEach((src,i)=>{
+      const w=document.createElement("div"); w.style.cssText="position:relative;display:inline-block";
+      const im=document.createElement("img"); im.src=src; im.style.cssText="max-width:96px;max-height:72px;border-radius:6px;border:1px solid var(--line);object-fit:cover";
+      const del=document.createElement("button"); del.textContent="✕"; del.style.cssText="position:absolute;top:-6px;right:-6px;background:#c0392b;color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:11px;cursor:pointer;line-height:1;padding:0";
+      del.addEventListener("click",()=>{ card._imgs.splice(i,1); renderImgs(); });
+      w.appendChild(im); w.appendChild(del); pImgs.appendChild(w);
+    });
+    pInfo.textContent=card._imgs.length?("已附 "+card._imgs.length+"/5 张"):"";
+    pImgAdd.style.display=card._imgs.length>=5?"none":"inline-block";
+  }
+  renderImgs();
+  pImgAdd.addEventListener("click",()=>pImg.click());
   pImg.addEventListener("change",e=>{
-    const f=e.target.files[0]; if(!f) return;
-    const rd=new FileReader();
-    rd.onload=ev=>{ card._img=ev.target.result; card._imgname=f.name;
-      pImgPrev.src=card._img; pImgPrev.style.display="inline-block";
-      pImgName.textContent=f.name; pImgClear.style.display="inline-block"; };
-    rd.readAsDataURL(f);
+    const files=[...(e.target.files||[])];
+    for(const f of files){ if(card._imgs.length>=5) break;
+      const rd=new FileReader();
+      rd.onload=ev=>{ card._imgs.push(ev.target.result); renderImgs(); };
+      rd.readAsDataURL(f);
+    }
+    pImg.value="";
   });
-  pImgClear.addEventListener("click",()=>{ card._img=""; card._imgname=""; pImg.value="";
-    pImgPrev.src=""; pImgPrev.style.display="none"; pImgName.textContent=""; pImgClear.style.display="none"; });
   plotRenumber();
 }
 function plotRenumber(){
@@ -1279,10 +1293,10 @@ function plotGenCard(card){
   const beat=card.querySelector(".p_beat").value.trim();
   if(!beat){ alert("先写这一镜的分镜剧情"); return; }
   const st=card.querySelector(".p_status");
-  const img=card._img||"";
+  const imgs=card._imgs||[];
   let payload="【整体剧情文案】\n"+(story||"（无整体文案）")+"\n\n【本镜分镜剧情】\n"+beat+"\n\n【全局风格锚定】\n"+(style||"（沿用默认）");
-  if(img) payload+="\n\n（已附本镜分镜图/首帧图，请基于画面中实际角色与场景写提示词，不要臆造图中没有的元素）";
-  runAi(payload,"plotshot",st,card.querySelector(".p_prompt"),null,null,null,img);
+  if(imgs.length) payload+="\n\n（已附本镜 "+imgs.length+" 张分镜图/首帧图，请综合各图画面中的实际角色与场景写提示词，不要臆造图中没有的元素）";
+  runAi(payload,"plotshot",st,card.querySelector(".p_prompt"),null,null,null,imgs);
 }
 function plotGenAll(){
   const cards=document.querySelectorAll("#plot_beats .plot-card");
@@ -1301,7 +1315,7 @@ function plotExport(){
     const prompt=c.querySelector(".p_prompt").value.trim();
     out+="—— 分镜 "+(i+1)+" ——\n";
     out+="分镜剧情："+(beat||"（未填）")+"\n";
-    if(c._imgname) out+="分镜图："+c._imgname+"（已在卡片附图，生成视频时一并上传该图）\n";
+    if(c._imgs&&c._imgs.length) out+="分镜图："+c._imgs.length+" 张（已在卡片附图，生成视频时一并上传）\n";
     out+="提示词："+(prompt||"（未生成，点该镜「AI 生成提示词」）")+"\n\n";
   });
   $("plot_preview").value=out.trim(); $("plot_preview").style.display="block";
