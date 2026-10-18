@@ -1081,7 +1081,6 @@ $("s_aiCopy").addEventListener("click",()=>{ navigator.clipboard.writeText($("s_
 $("f_aiCopy").addEventListener("click",()=>{ navigator.clipboard.writeText($("f_aiOut").value).then(()=>alert("已复制 AI 输出")); });
 ["ai_base","ai_key","ai_model"].forEach(id=>$(id).addEventListener("input",saveAiConf));
 (function loadAiConf(){ const c=aiConf(); if(c.base)$("ai_base").value=c.base; if(c.key)$("ai_key").value=c.key; if(c.model)$("ai_model").value=c.model; })();
-(function initPreset(){ if(!localStorage.getItem("ai_base")){ const sel=$("ai_preset"); sel.value="ollamacloud"; sel.dispatchEvent(new Event("change")); } })();
 const AI_PRESETS={
   openai:{base:"https://api.openai.com/v1",model:"gpt-4o-mini"},
   deepseek:{base:"https://api.deepseek.com",model:"deepseek-chat"},
@@ -1098,6 +1097,12 @@ $("ai_preset").addEventListener("change",e=>{
     const tip=(e.target.value==="ollama")?"（本地运行，Key 可留空）":"，填 Key 后点测试连接";
     $("ai_testStatus").textContent="已填入 "+e.target.value+" 预设"+tip; $("ai_testStatus").style.color="var(--muted)"; }
 });
+// 启动时按已存 Base 反推下拉框，保证显示与实际配置一致（不再出现"显示云端、实际本地"）
+(function initPreset(){
+  const c=aiConf(); const sel=$("ai_preset");
+  const hit=Object.entries(AI_PRESETS).find(([,v])=>v.base===c.base);
+  sel.value=hit?hit[0]:(c.base?"custom":"");
+})();
 async function testAi(){
   saveAiConf();
   const c=aiConf(); const st=$("ai_testStatus");
