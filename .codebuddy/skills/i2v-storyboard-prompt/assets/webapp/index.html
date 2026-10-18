@@ -1170,6 +1170,14 @@ const VFX={
   chromatic:{name:"色散/色差畸变",desc:"高速运动边缘出现 RGB 色散与色差"},
   bloom:{name:"体积光晕·Bloom",desc:"强光源溢出发光晕，画面通透梦幻"}
 };
+// 技能知识上下文：把镜头库/特效库/创新法注入到每个 AI 生成请求的 system 提示词，让模型"学习"本技能框架
+const SKILL_CTX=
+"【本工具技能框架（生成时必须遵循此专业体系）】\n"+
+"① 镜头语言词汇表（优先使用这些命名运镜，而非泛泛描述）：\n"+Object.entries(CAM).map(([,v])=>"· "+v.name+"："+v.skeleton).join("\n")+"\n"+
+"② 视觉特效词汇表（优先使用这些命名特效）：\n"+Object.entries(VFX).map(([,v])=>"· "+v.name+"："+v.desc).join("\n")+"\n"+
+"③ 跨界创新法：把『运镜轨迹』与『特效物理』做 1+1>2 的耦合（如某运镜角度触发某特效、能量沿轨迹流转、击中点引爆连锁反应），禁止简单拼接。\n"+
+"④ 画质/氛围锚定词（按需选用）：电影级写实、HDR 高动态范围、细节锐利、体积光、粒子丰富、8K 超写实渲染。\n";
+Object.keys(AI_FMTS).forEach(k=>{ AI_FMTS[k].sys = SKILL_CTX + "\n" + AI_FMTS[k].sys; });
 document.querySelectorAll("#lab .chip").forEach(ch=>ch.addEventListener("click",()=>ch.classList.toggle("on")));
 function labSel(cls){ return [...document.querySelectorAll("#lab ."+cls+".on")].map(e=>e.dataset.key); }
 function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
