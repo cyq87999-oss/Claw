@@ -121,6 +121,9 @@ first-frame / reference image of shot N+1.
   wants richer phrasing.
 - `references/templates.md` — full worked examples across styles (国风漫剧 / 厚涂 / 3D 渲染 / 写实),
   single shots and multi-shot sequences, with start-end continuity.
+- `references/styles_apocalypse.md` — **末日废墟 / 废土** 风格扩展包：核心风格词、光影、细节、
+  构图运镜、通用模板、运镜大全、动作库、即梦音效(dB)速查、末日专属负面词、3 分钟分镜范例
+  《余烬》。生成时把对应词串填入 10 要素即可。
 - `scripts/generate_prompt.py` — deterministic assembler. Reads a JSON of the 10 fields, applies
   vertical logic, and prints a validated prompt. Use for batch or guaranteed completeness.
 - `assets/webapp/index.html` — **零安装网页版 / 单文件 App**：10 要素表单、实时预览、竖屏逻辑

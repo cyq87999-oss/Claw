@@ -92,6 +92,7 @@
       <span class="preset" data-preset="houqi">厚涂动漫</span>
       <span class="preset" data-preset="render3d">3D 渲染</span>
       <span class="preset" data-preset="xieshi">写实电影</span>
+      <span class="preset" data-preset="moji">末日废墟</span>
     </div>
 
     <div class="plot-box">
@@ -183,7 +184,9 @@ const PRESETS = {
   guofeng:{style:"国风漫剧、厚涂笔触、电影感、细节丰富、统一美术风格"},
   houqi:{style:"厚涂、日式动漫、赛璐璐、电影感、统一美术风格"},
   render3d:{style:"3D 渲染、虚幻引擎风格、光线追踪、电影级调色、8K"},
-  xieshi:{style:"写实、胶片感、电影级调色、细节丰富、高质感"}
+  xieshi:{style:"写实、胶片感、电影级调色、细节丰富、高质感"},
+  moji:{style:"末日废墟城市，断壁残垣崩塌高楼，锈蚀残破建筑，荒草丛生藤蔓缠绕，废弃破碎街道，灰蒙蒙沙尘弥漫，低饱和冷色调，阴郁压抑末世氛围，电影级光影，8K 超高清，极致细节，写实质感，广角全景，死寂无人空城",
+       negative:"漂浮的物体，反重力，人物穿模，四肢扭曲，动作僵硬，表情崩坏，多余的手指，畸形的身体，干净整洁的建筑，没有锈迹，没有灰尘，明亮鲜艳的色彩，现代完好的车辆，正常的行人，蓝天白云，阳光明媚，卡通风格，二次元，低分辨率，模糊，噪点过多，水印，文字"}
 };
 
 const $ = id => document.getElementById(id);
@@ -371,7 +374,9 @@ function renderSeq(){
 ["s_subject","s_action","s_camera","s_shot","s_lighting","s_style","s_rhythm","s_spatial","s_frames","s_negative","s_ref","s_plot"]
   .forEach(id=>$(id).addEventListener("input",renderSingle));
 document.querySelectorAll(".preset").forEach(p=>{
-  p.addEventListener("click",()=>{ const pre=PRESETS[p.dataset.preset]; if(pre) $("s_style").value=pre.style; renderSingle(); });
+  p.addEventListener("click",()=>{ const pre=PRESETS[p.dataset.preset];
+    if(pre){ $("s_style").value=pre.style; if(pre.negative && !val("s_negative")) $("s_negative").value=pre.negative; }
+    renderSingle(); });
 });
 $("refToggle").addEventListener("click",()=>{ const b=$("refBox"); b.style.display=b.style.display==="none"?"block":"none"; });
 $("s_copy").addEventListener("click",()=>{ renderSingle(); navigator.clipboard.writeText($("s_preview").textContent).then(()=>alert("已复制提示词")); });

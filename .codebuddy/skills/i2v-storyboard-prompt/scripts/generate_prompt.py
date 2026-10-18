@@ -7,6 +7,7 @@ validates completeness, and prints a copy-ready prompt plus an EN negative list.
 Usage:
     python3 generate_prompt.py shot.json
     python3 generate_prompt.py shot.json --no-vertical
+    python3 generate_prompt.py shot.json --preset moji   # 套用末日废墟风格 + 专属负面词
     cat shot.json | python3 generate_prompt.py -
 
 JSON schema (all 10 fields required unless noted):
@@ -56,6 +57,21 @@ DEFAULT_CN_NEGATIVE = [
     "面部畸变", "字幕", "水印", "logo", "文字", "风格跳变", "低质量",
     "过曝", "死黑", "噪点", "穿模", "画面抖动", "闪烁", "抽帧",
 ]
+
+
+PRESETS = {
+    "guofeng":  {"style": "国风漫剧、厚涂笔触、电影感、细节丰富、统一美术风格"},
+    "houqi":    {"style": "厚涂、日式动漫、赛璐璐、电影感、统一美术风格"},
+    "render3d": {"style": "3D 渲染、虚幻引擎风格、光线追踪、电影级调色、8K"},
+    "xieshi":   {"style": "写实、胶片感、电影级调色、细节丰富、高质感"},
+    "moji":     {"style": "末日废墟城市，断壁残垣崩塌高楼，锈蚀残破建筑，荒草丛生藤蔓缠绕，"
+                          "废弃破碎街道，灰蒙蒙沙尘弥漫，低饱和冷色调，阴郁压抑末世氛围，"
+                          "电影级光影，8K 超高清，极致细节，写实质感，广角全景，死寂无人空城",
+                "negative": "漂浮的物体，反重力，人物穿模，四肢扭曲，动作僵硬，表情崩坏，"
+                            "多余的手指，畸形的身体，干净整洁的建筑，没有锈迹，没有灰尘，"
+                            "明亮鲜艳的色彩，现代完好的车辆，正常的行人，蓝天白云，阳光明媚，"
+                            "卡通风格，二次元，低分辨率，模糊，噪点过多，水印，文字"},
+}
 
 
 def load_data(path):
@@ -136,14 +152,39 @@ def build(d, vertical=True):
 
 
 def main():
-    args = sys.argv[1:]
-    if not args or args[0] in ("-h", "--help"):
+    raw = sys.argv[1:]
+    if not raw or raw[0] in ("-h", "--help"):
         print(__doc__)
         return
-    path = args[0]
-    vertical = "--no-vertical" not in args
+    path = None
+    vertical = True
+    preset = None
+    i = 0
+    while i < len(raw):
+        a = raw[i]
+        if a == "--no-vertical":
+            vertical = False
+        elif a == "--preset":
+            preset = raw[i + 1]
+            i += 2
+            continue
+        elif path is None:
+            path = a
+        i += 1
+    if path is None:
+        print("用法：python3 generate_prompt.py shot.json [--preset moji] [--no-vertical]")
+        return
 
     d = load_data(path)
+    if preset:
+        p = PRESETS.get(preset)
+        if not p:
+            print("未知预设：%s（可选：%s）" % (preset, " / ".join(PRESETS)))
+            return
+        if not d.get("style"):
+            d["style"] = p.get("style", "")
+        if "negative" in p and not d.get("negative"):
+            d["negative"] = p["negative"]
     prompt, cn_neg = build(d, vertical)
     warns = vertical_warnings(d) if vertical else []
     imgs = d.get("images") or []
