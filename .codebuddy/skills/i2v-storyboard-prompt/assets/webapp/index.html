@@ -975,7 +975,7 @@ const AI_FMTS={
   basicset:{json:false,sys:"你是顶尖的 AI 视频分镜提示词专家，熟悉「基础设定+画面内容」双层模板：先写【基础设定】（锁定角色外观/服装/坐骑/场景/光线/破坏状态/表情机制）+【氛围与画质】，再写【画面内容】（多个片段，每片段含景别/构图/运镜/画面内容），末附负面提示词。请直接输出完整提示词纯文本，不要 JSON，不要解释，不要加 markdown 围栏。"},
   seedance:{json:false,sys:"你是顶尖的 AI 视频分镜提示词专家，熟悉 Seedance 时间码分镜：每镜格式为「镜头 0N【起始s-结束s】景别 / 运镜」+「画面视图：…」+「声音设计：…」，多镜时间码递进。请直接输出完整提示词纯文本，不要 JSON，不要解释，不要加 markdown 围栏。"},
   innovate:{json:true,sys:"你是顶尖的运镜与视觉特效创新师。用户会给你若干『运镜资源』和『视觉特效资源』作为素材，以及一句话基础场景。请基于这些素材，跨界杂交出一种『全新的运镜+视觉特效组合』，它不应是素材的简单拼接，而要产生 1+1>2 的新效果（例如把A的运镜轨迹与B的特效物理耦合，在某秒触发连锁反应）。输出 JSON，键为：name(给新组合起个酷名),camera(新运镜描述，含时间码与角度),vfx(新特效描述，含触发节点与物理),fusion(一句话说明耦合机制),prompt(可直接使用的完整提示词片段，中文)。只输出 JSON，不要解释。"},
-  plotshot:{json:false,sys:"你是顶尖的 AI 视频分镜提示词专家。用户会给你一段【整体剧情文案】、一个【本镜分镜剧情】（单个镜头的剧情/动作描述）、以及【全局风格锚定】。请只针对这一镜，写出贴合该分镜剧情的【分镜提示词】，严格不添加剧情文案里没有的角色、地点或动作（防止跑偏），只做镜头化转译。提示词用中文，覆盖：主体锁定/动作/镜头运动/景别构图/光影氛围/风格一致性/节奏时长/空间关系，末尾附简短负面提示词。不要输出 JSON，不要解释，不要加 markdown 围栏。"}
+  plotshot:{json:false,sys:"你是顶尖的 AI 视频分镜提示词专家。用户会给你【整体剧情文案】、一个【本镜分镜剧情】（单镜剧情/动作描述），以及可选的【分镜图/首帧图】（若已附则必须结合画面中的真实角色与场景，不臆造图中没有的元素）。请只针对这一镜，输出【分镜提示词】，必须严格遵循以下 10 要素规格，逐行用中文短句列出：\n1.主体锁定：\n2.动作描述：\n3.镜头运动：\n4.景别构图：\n5.光影氛围：\n6.风格一致性：\n7.节奏时长：\n8.空间关系：\n9.首尾帧约束：\n10.负面提示词：\n再追加两条：\n音效设计：（拟声词 + 环境音，如「剑鸣—— 骤雨 脚步声」）\n对话台词：（本镜角色台词，无则写「无」）\n要求：严格不添加剧情文案里没有的角色/地点/动作（防止跑偏）；只做镜头化转译；不要输出 JSON、不要解释、不要加 markdown 围栏；直接输出上述带标签的纯文本。"}
 };
 const SINGLE_MAP={subject:"s_subject",action:"s_action",camera:"s_camera",shot:"s_shot",lighting:"s_lighting",style:"s_style",rhythm:"s_rhythm",spatial:"s_spatial",frames:"s_frames",negative:"s_negative",plot:"s_plot"};
 const FIGHT_MAP=["name","dur","quality","art","scene","a","b","line","cam1","act1","fx1","cam2","act2","fx2","cam3","act3","fx3"];
@@ -993,21 +993,24 @@ async function ollamaLocalChat(model,messages,wantJson){
   }
   return {ok:false,err:lastErr};
 }
-async function runAi(scene,fmt,statusEl,textOutEl,map,renderFn,jsonOutKey){
+async function runAi(scene,fmt,statusEl,textOutEl,map,renderFn,jsonOutKey,img){
   const cfg=AI_FMTS[fmt]||AI_FMTS.single10; if(!cfg) return;
   const c=aiConf(); const local=/localhost|127\.0\.0\.1/.test(c.base);
   if(!c.key && !local){ alert("请先在「AI 联网设置」里填写 API Key（本地 Ollama 可留空）"); return; }
   statusEl.textContent="生成中…";
-  let txt="";
+  let txt=""; let imgNote="";
   try{
     if(local){
-      const r=await ollamaLocalChat(c.model,[{role:"system",content:cfg.sys},{role:"user",content:scene}],cfg.json);
+      const mk=im=>{ const u={role:"user",content:scene}; if(im){ const b64=String(im).replace(/^data:.*;base64,/,""); u.images=[b64]; } return u; };
+      let r=await ollamaLocalChat(c.model,[{role:"system",content:cfg.sys},mk(img)],cfg.json);
+      if(!r.ok && img){ r=await ollamaLocalChat(c.model,[{role:"system",content:cfg.sys},mk("")],cfg.json); if(r.ok) imgNote="（模型未能读取图片，已仅按剧情生成）"; }
       if(!r.ok) throw new Error(r.err);
       const j=r.j;
       txt=(j.message?j.message.content:"")||"";
     } else {
       const url=c.base+"/chat/completions";
-      const reqBody={model:c.model,messages:[{role:"system",content:cfg.sys},{role:"user",content:scene}],temperature:0.8};
+      const uContent=img?[{type:"text",text:scene},{type:"image_url",image_url:{url:img}}]:scene;
+      const reqBody={model:c.model,messages:[{role:"system",content:cfg.sys},{role:"user",content:uContent}],temperature:0.8};
       if(cfg.json) reqBody.response_format={type:"json_object"};
       const headers={"Content-Type":"application/json"}; if(c.key) headers.Authorization="Bearer "+c.key;
       const res=await fetch(url,{method:"POST",headers,body:JSON.stringify(reqBody)});
@@ -1022,17 +1025,17 @@ async function runAi(scene,fmt,statusEl,textOutEl,map,renderFn,jsonOutKey){
         if(Array.isArray(map)) map.forEach(k=>{ if(d[k]!==undefined && $("f_"+k)) $("f_"+k).value=d[k]; });
         else Object.keys(map).forEach(k=>{ if(d[k]!==undefined) $(map[k]).value=d[k]; });
         if(renderFn) renderFn();
-        statusEl.textContent="✅ 已生成并填入，右侧可复制";
+        statusEl.textContent="✅ 已生成并填入，右侧可复制"+imgNote;
       }
       if(jsonOutKey){
         textOutEl.value=d[jsonOutKey]||""; textOutEl.style.display="block";
         const cp=textOutEl.nextElementSibling; if(cp) cp.style.display="inline-block";
-        if(!map) statusEl.textContent="✅ AI 已生成跨界创新方案，下方可复制";
+        if(!map) statusEl.textContent="✅ AI 已生成跨界创新方案，下方可复制"+imgNote;
       }
     } else {
       textOutEl.value=txt; textOutEl.style.display="block";
       const cp=textOutEl.nextElementSibling; if(cp) cp.style.display="inline-block";
-      statusEl.textContent="✅ 已生成，下方可复制（也可微调后使用）";
+      statusEl.textContent="✅ 已生成，下方可复制（也可微调后使用）"+imgNote;
     }
   }catch(e){ statusEl.textContent="❌ "+e.message; }
 }
@@ -1200,6 +1203,13 @@ function plotAddCard(beat,prompt){
     '</div>'+
     '<label style="font-size:11px;color:var(--muted)">分镜剧情（这一镜讲什么）</label>'+
     '<textarea class="p_beat" rows="2" style="width:100%;margin:4px 0;background:#0a0c12;color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:8px;font-size:12px;font-family:inherit">'+escapeHtml(beat)+'</textarea>'+
+    '<div class="p_imgbox" style="margin:6px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
+      '<label class="btn ghost p_imgbtn" style="font-size:11px;padding:4px 10px;cursor:pointer;margin:0">🖼 分镜图</label>'+
+      '<input type="file" accept="image/*" class="p_img" style="display:none">'+
+      '<button class="btn ghost p_imgclear" style="display:none;font-size:11px;padding:3px 8px">清除</button>'+
+      '<span class="p_imgname" style="font-size:11px;color:var(--muted)"></span>'+
+      '<img class="p_imgprev" style="display:none;max-width:110px;max-height:80px;border-radius:6px;border:1px solid var(--line);object-fit:cover" />'+
+    '</div>'+
     '<div style="display:flex;gap:8px;margin:4px 0">'+
       '<button class="btn p_gen" style="font-size:12px;padding:5px 12px">AI 生成提示词</button>'+
       '<span class="p_status" style="font-size:11px;color:var(--muted);align-self:center"></span>'+
@@ -1209,6 +1219,20 @@ function plotAddCard(beat,prompt){
   wrap.appendChild(card);
   card.querySelector(".p_del").addEventListener("click",()=>{ card.remove(); plotRenumber(); });
   card.querySelector(".p_gen").addEventListener("click",()=>plotGenCard(card));
+  const pImgBtn=card.querySelector(".p_imgbtn"), pImg=card.querySelector(".p_img"),
+        pImgPrev=card.querySelector(".p_imgprev"), pImgName=card.querySelector(".p_imgname"),
+        pImgClear=card.querySelector(".p_imgclear");
+  pImgBtn.addEventListener("click",()=>pImg.click());
+  pImg.addEventListener("change",e=>{
+    const f=e.target.files[0]; if(!f) return;
+    const rd=new FileReader();
+    rd.onload=ev=>{ card._img=ev.target.result; card._imgname=f.name;
+      pImgPrev.src=card._img; pImgPrev.style.display="inline-block";
+      pImgName.textContent=f.name; pImgClear.style.display="inline-block"; };
+    rd.readAsDataURL(f);
+  });
+  pImgClear.addEventListener("click",()=>{ card._img=""; card._imgname=""; pImg.value="";
+    pImgPrev.src=""; pImgPrev.style.display="none"; pImgName.textContent=""; pImgClear.style.display="none"; });
   plotRenumber();
 }
 function plotRenumber(){
@@ -1231,8 +1255,10 @@ function plotGenCard(card){
   const beat=card.querySelector(".p_beat").value.trim();
   if(!beat){ alert("先写这一镜的分镜剧情"); return; }
   const st=card.querySelector(".p_status");
-  const payload="【整体剧情文案】\n"+(story||"（无整体文案）")+"\n\n【本镜分镜剧情】\n"+beat+"\n\n【全局风格锚定】\n"+(style||"（沿用默认）");
-  runAi(payload,"plotshot",st,card.querySelector(".p_prompt"),null,null);
+  const img=card._img||"";
+  let payload="【整体剧情文案】\n"+(story||"（无整体文案）")+"\n\n【本镜分镜剧情】\n"+beat+"\n\n【全局风格锚定】\n"+(style||"（沿用默认）");
+  if(img) payload+="\n\n（已附本镜分镜图/首帧图，请基于画面中实际角色与场景写提示词，不要臆造图中没有的元素）";
+  runAi(payload,"plotshot",st,card.querySelector(".p_prompt"),null,null,null,img);
 }
 function plotGenAll(){
   const cards=document.querySelectorAll("#plot_beats .plot-card");
@@ -1251,6 +1277,7 @@ function plotExport(){
     const prompt=c.querySelector(".p_prompt").value.trim();
     out+="—— 分镜 "+(i+1)+" ——\n";
     out+="分镜剧情："+(beat||"（未填）")+"\n";
+    if(c._imgname) out+="分镜图："+c._imgname+"（已在卡片附图，生成视频时一并上传该图）\n";
     out+="提示词："+(prompt||"（未生成，点该镜「AI 生成提示词」）")+"\n\n";
   });
   $("plot_preview").value=out.trim(); $("plot_preview").style.display="block";
