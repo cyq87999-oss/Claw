@@ -95,6 +95,17 @@
 
   <details class="ai-set" style="margin:10px 0">
     <summary>AI 联网生成设置（可选 · 填后可在各页点「AI 生成」自动写场景）</summary>
+    <div style="display:flex;gap:8px;align-items:center;margin-top:8px;font-size:12px;flex-wrap:wrap">
+      <select id="ai_preset">
+        <option value="">服务商预设（选一个自动填 Base/模型）</option>
+        <option value="openai">OpenAI · api.openai.com</option>
+        <option value="deepseek">DeepSeek · api.deepseek.com</option>
+        <option value="qwen">通义千问 · dashscope</option>
+        <option value="moonshot">Kimi/月之暗面 · moonshot.cn</option>
+        <option value="silicon">硅基流动 SiliconFlow</option>
+        <option value="custom">自定义</option>
+      </select>
+    </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;font-size:12px">
       <input id="ai_base" placeholder="API Base，如 https://api.openai.com/v1" style="flex:2;min-width:220px" />
       <input id="ai_key" type="password" placeholder="API Key（只存本机浏览器）" style="flex:2;min-width:200px" />
@@ -104,7 +115,7 @@
       <button class="btn" id="ai_test">测试连接</button>
       <span id="ai_testStatus" style="font-size:12px;color:var(--muted)"></span>
     </div>
-    <div style="font-size:11px;color:var(--muted);margin-top:6px">保存于本机 localStorage，不会上传给任何人。支持 OpenAI / DeepSeek / 通义千问 等 OpenAI 兼容接口。无 Key 时，各页仍可手动填写。</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:6px">保存于本机 localStorage，不会上传给任何人，支持所有 OpenAI 兼容接口。<b style="color:var(--warn)">注意：该地址必须能从你的浏览器直接访问（不被墙、且允许跨域 CORS）。默认 api.openai.com 在国内常连不上，建议用 DeepSeek / 通义 / Kimi / 硅基流动 等国内可直连的服务，选上方预设即可自动填好。</b></div>
   </details>
 
   <!-- 单镜 -->
@@ -1004,9 +1015,22 @@ $("s_aiCopy").addEventListener("click",()=>{ navigator.clipboard.writeText($("s_
 $("f_aiCopy").addEventListener("click",()=>{ navigator.clipboard.writeText($("f_aiOut").value).then(()=>alert("已复制 AI 输出")); });
 ["ai_base","ai_key","ai_model"].forEach(id=>$(id).addEventListener("input",saveAiConf));
 (function loadAiConf(){ const c=aiConf(); if(c.base)$("ai_base").value=c.base; if(c.key)$("ai_key").value=c.key; if(c.model)$("ai_model").value=c.model; })();
+const AI_PRESETS={
+  openai:{base:"https://api.openai.com/v1",model:"gpt-4o-mini"},
+  deepseek:{base:"https://api.deepseek.com",model:"deepseek-chat"},
+  qwen:{base:"https://dashscope.aliyuncs.com/compatible-mode/v1",model:"qwen-plus"},
+  moonshot:{base:"https://api.moonshot.cn/v1",model:"moonshot-v1-8k"},
+  silicon:{base:"https://api.siliconflow.cn/v1",model:"deepseek-ai/DeepSeek-V3"}
+};
+$("ai_preset").addEventListener("change",e=>{
+  const p=AI_PRESETS[e.target.value];
+  if(p){ $("ai_base").value=p.base; $("ai_model").value=p.model; saveAiConf();
+    $("ai_testStatus").textContent="已填入 "+e.target.value+" 预设，填 Key 后点测试连接"; $("ai_testStatus").style.color="var(--muted)"; }
+});
 async function testAi(){
   saveAiConf();
   const c=aiConf(); const st=$("ai_testStatus");
+  if(!c.base){ st.textContent="先选服务商预设或填 API Base"; st.style.color="var(--warn)"; return; }
   if(!c.key){ st.textContent="先填 API Key"; st.style.color="var(--warn)"; return; }
   st.textContent="连接中…"; st.style.color="var(--muted)";
   try{
@@ -1015,7 +1039,13 @@ async function testAi(){
     const j=await res.json();
     if(j.choices&&j.choices[0]){ st.textContent="✅ 连接成功（"+c.model+" 可用）"; st.style.color="var(--ok)"; }
     else throw new Error("返回异常："+JSON.stringify(j).slice(0,120));
-  }catch(e){ st.textContent="❌ "+e.message; st.style.color="var(--warn)"; }
+  }catch(e){
+    let msg=e.message||String(e);
+    if(/Failed to fetch|NetworkError|TypeError/.test(msg)){
+      msg="连接失败：多半是网络不可达（被墙/需代理）或该地址不允许浏览器跨域(CORS)。建议改用国内可直连的服务商（选上方预设），或确认该端点允许 CORS 且未被拦截。";
+    }
+    st.textContent="❌ "+msg; st.style.color="var(--warn)";
+  }
 }
 $("ai_test").addEventListener("click",testAi);
 
