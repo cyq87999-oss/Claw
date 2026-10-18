@@ -104,7 +104,8 @@
         <option value="moonshot">Kimi/月之暗面 · moonshot.cn</option>
         <option value="silicon">硅基流动 SiliconFlow（免费模型免余额）</option>
         <option value="groq">Groq 免费 Llama（免绑卡）</option>
-        <option value="ollama" selected>本地 Ollama（无需 Key，免费，默认）</option>
+        <option value="ollamacloud" selected>Ollama 云端（大模型+看图，用 Ollama Key）</option>
+        <option value="ollama">本地 Ollama（无需 Key，免费）</option>
         <option value="custom">自定义</option>
       </select>
     </div>
@@ -1065,7 +1066,7 @@ $("s_aiCopy").addEventListener("click",()=>{ navigator.clipboard.writeText($("s_
 $("f_aiCopy").addEventListener("click",()=>{ navigator.clipboard.writeText($("f_aiOut").value).then(()=>alert("已复制 AI 输出")); });
 ["ai_base","ai_key","ai_model"].forEach(id=>$(id).addEventListener("input",saveAiConf));
 (function loadAiConf(){ const c=aiConf(); if(c.base)$("ai_base").value=c.base; if(c.key)$("ai_key").value=c.key; if(c.model)$("ai_model").value=c.model; })();
-(function initPreset(){ if(!localStorage.getItem("ai_base")){ const sel=$("ai_preset"); sel.value="ollama"; sel.dispatchEvent(new Event("change")); } })();
+(function initPreset(){ if(!localStorage.getItem("ai_base")){ const sel=$("ai_preset"); sel.value="ollamacloud"; sel.dispatchEvent(new Event("change")); } })();
 const AI_PRESETS={
   openai:{base:"https://api.openai.com/v1",model:"gpt-4o-mini"},
   deepseek:{base:"https://api.deepseek.com",model:"deepseek-chat"},
@@ -1073,7 +1074,8 @@ const AI_PRESETS={
   moonshot:{base:"https://api.moonshot.cn/v1",model:"moonshot-v1-8k"},
   silicon:{base:"https://api.siliconflow.cn/v1",model:"Qwen/Qwen2.5-7B-Instruct"},
   groq:{base:"https://api.groq.com/openai/v1",model:"llama-3.3-70b-versatile"},
-  ollama:{base:"http://localhost:11434/v1",model:"qwen3.5:latest"}
+  ollama:{base:"http://localhost:11434/v1",model:"qwen3.5:latest"},
+  ollamacloud:{base:"https://ollama.com/v1",model:"gemma4:31b-cloud"}
 };
 $("ai_preset").addEventListener("change",e=>{
   const p=AI_PRESETS[e.target.value];
