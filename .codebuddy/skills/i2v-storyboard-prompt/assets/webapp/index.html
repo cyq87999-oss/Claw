@@ -100,6 +100,10 @@
       <input id="ai_key" type="password" placeholder="API Key（只存本机浏览器）" style="flex:2;min-width:200px" />
       <input id="ai_model" placeholder="模型，如 gpt-4o-mini / deepseek-chat" style="flex:1;min-width:160px" />
     </div>
+    <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+      <button class="btn" id="ai_test">测试连接</button>
+      <span id="ai_testStatus" style="font-size:12px;color:var(--muted)"></span>
+    </div>
     <div style="font-size:11px;color:var(--muted);margin-top:6px">保存于本机 localStorage，不会上传给任何人。支持 OpenAI / DeepSeek / 通义千问 等 OpenAI 兼容接口。无 Key 时，各页仍可手动填写。</div>
   </details>
 
@@ -1000,6 +1004,20 @@ $("s_aiCopy").addEventListener("click",()=>{ navigator.clipboard.writeText($("s_
 $("f_aiCopy").addEventListener("click",()=>{ navigator.clipboard.writeText($("f_aiOut").value).then(()=>alert("已复制 AI 输出")); });
 ["ai_base","ai_key","ai_model"].forEach(id=>$(id).addEventListener("input",saveAiConf));
 (function loadAiConf(){ const c=aiConf(); if(c.base)$("ai_base").value=c.base; if(c.key)$("ai_key").value=c.key; if(c.model)$("ai_model").value=c.model; })();
+async function testAi(){
+  saveAiConf();
+  const c=aiConf(); const st=$("ai_testStatus");
+  if(!c.key){ st.textContent="先填 API Key"; st.style.color="var(--warn)"; return; }
+  st.textContent="连接中…"; st.style.color="var(--muted)";
+  try{
+    const res=await fetch(c.base+"/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+c.key},body:JSON.stringify({model:c.model,messages:[{role:"user",content:"ping"}],temperature:0.1})});
+    if(!res.ok){ const t=await res.text(); throw new Error("HTTP "+res.status+" "+t.slice(0,140)); }
+    const j=await res.json();
+    if(j.choices&&j.choices[0]){ st.textContent="✅ 连接成功（"+c.model+" 可用）"; st.style.color="var(--ok)"; }
+    else throw new Error("返回异常："+JSON.stringify(j).slice(0,120));
+  }catch(e){ st.textContent="❌ "+e.message; st.style.color="var(--warn)"; }
+}
+$("ai_test").addEventListener("click",testAi);
 
 // ---- 创新实验室 ----
 const CAM={
