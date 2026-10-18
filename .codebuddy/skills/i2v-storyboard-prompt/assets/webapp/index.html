@@ -99,11 +99,11 @@
       <select id="ai_preset">
         <option value="">服务商预设（选一个自动填 Base/模型）</option>
         <option value="openai">OpenAI · api.openai.com</option>
-        <option value="deepseek" selected>DeepSeek · api.deepseek.com（默认）</option>
-        <option value="deepseek">DeepSeek · api.deepseek.com</option>
+        <option value="deepseek">DeepSeek · api.deepseek.com（付费，需充值）</option>
         <option value="qwen">通义千问 · dashscope</option>
         <option value="moonshot">Kimi/月之暗面 · moonshot.cn</option>
-        <option value="silicon">硅基流动 SiliconFlow</option>
+        <option value="silicon" selected>硅基流动 SiliconFlow（免费模型免余额，默认）</option>
+        <option value="groq">Groq 免费 Llama（免绑卡）</option>
         <option value="custom">自定义</option>
       </select>
     </div>
@@ -1041,7 +1041,8 @@ const AI_PRESETS={
   deepseek:{base:"https://api.deepseek.com",model:"deepseek-chat"},
   qwen:{base:"https://dashscope.aliyuncs.com/compatible-mode/v1",model:"qwen-plus"},
   moonshot:{base:"https://api.moonshot.cn/v1",model:"moonshot-v1-8k"},
-  silicon:{base:"https://api.siliconflow.cn/v1",model:"deepseek-ai/DeepSeek-V3"}
+  silicon:{base:"https://api.siliconflow.cn/v1",model:"Qwen/Qwen2.5-7B-Instruct"},
+  groq:{base:"https://api.groq.com/openai/v1",model:"llama-3.3-70b-versatile"}
 };
 $("ai_preset").addEventListener("change",e=>{
   const p=AI_PRESETS[e.target.value];
