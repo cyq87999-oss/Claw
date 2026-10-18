@@ -85,6 +85,16 @@
     <div class="tab" data-tab="fight">打斗版</div>
   </div>
 
+  <details class="ai-set" style="margin:10px 0">
+    <summary>AI 联网生成设置（可选 · 填后可在各页点「AI 生成」自动写场景）</summary>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;font-size:12px">
+      <input id="ai_base" placeholder="API Base，如 https://api.openai.com/v1" style="flex:2;min-width:220px" />
+      <input id="ai_key" type="password" placeholder="API Key（只存本机浏览器）" style="flex:2;min-width:200px" />
+      <input id="ai_model" placeholder="模型，如 gpt-4o-mini / deepseek-chat" style="flex:1;min-width:160px" />
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-top:6px">保存于本机 localStorage，不会上传给任何人。支持 OpenAI / DeepSeek / 通义千问 等 OpenAI 兼容接口。无 Key 时，各页仍可手动填写。</div>
+  </details>
+
   <!-- 单镜 -->
   <div id="single" class="tabpanel">
     <div class="presets">
@@ -99,6 +109,15 @@
     <div class="plot-box">
       <label>剧情提示词（可选 · 一句话梗概，置于序列顶部）</label>
       <textarea id="s_plot" rows="2" placeholder="如：少女为复仇潜入雨夜古堡，三镜内完成拔剑对峙。"></textarea>
+    </div>
+
+    <div class="ai-gen" style="border:1px solid var(--line);border-radius:8px;padding:10px;margin:10px 0">
+      <label style="font-size:12px;color:var(--muted)">一句话场景 → AI 自动生成 10 要素提示词（需先在上方「AI 联网设置」填 Key）</label>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <textarea id="s_aiIn" rows="2" placeholder="如：柳如烟与柳如霜在皇宫内持剑打斗，一镜到底，国风写实" style="flex:1"></textarea>
+        <button class="btn" id="s_aiGen">AI 生成</button>
+      </div>
+      <div id="s_aiStatus" style="font-size:12px;color:var(--muted);margin-top:6px"></div>
     </div>
 
     <div class="layout">
@@ -258,6 +277,14 @@
     <div class="layout">
       <div class="card">
         <h2>打斗版生成器 · 填关键项</h2>
+        <div class="ai-gen" style="border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:12px">
+          <label style="font-size:12px;color:var(--muted)">一句话场景 → AI 自动生成打斗版（需先在上方「AI 联网设置」填 Key）</label>
+          <div style="display:flex;gap:8px;margin-top:6px">
+            <textarea id="f_aiIn" rows="2" placeholder="如：柳如烟与柳如霜在皇宫内持剑打斗，一镜到底，国风写实，含嘲讽台词" style="flex:1"></textarea>
+            <button class="btn" id="f_aiGen">AI 生成</button>
+          </div>
+          <div id="f_aiStatus" style="font-size:12px;color:var(--muted);margin-top:6px"></div>
+        </div>
         <div class="field"><label><b>段落名称</b></label>
           <input id="f_name" placeholder="如：黄沙对峙 · 狂风嘲讽" /></div>
         <div class="field"><label><b>总时长（秒）</b></label>
@@ -580,6 +607,59 @@ function renderFight(){
  .forEach(id=>$(id).addEventListener("input",renderFight));
 $("f_copy").addEventListener("click",()=>{ navigator.clipboard.writeText($("f_preview").textContent).then(()=>alert("已复制打斗提示词")); });
 renderFight();
+
+// ---- AI 联网生成 ----
+function aiConf(){
+  return {base:(localStorage.getItem("ai_base")||"https://api.openai.com/v1").replace(/\/+$/,""),
+          key:localStorage.getItem("ai_key")||"",
+          model:localStorage.getItem("ai_model")||"gpt-4o-mini"};
+}
+function saveAiConf(){
+  localStorage.setItem("ai_base",$("ai_base").value.trim());
+  localStorage.setItem("ai_key",$("ai_key").value.trim());
+  localStorage.setItem("ai_model",$("ai_model").value.trim());
+}
+async function aiCall(messages){
+  const c=aiConf();
+  if(!c.key){ alert("请先在「AI 联网设置」里填写 API Key"); return null; }
+  const body={model:c.model,messages:messages,temperature:0.8,response_format:{type:"json_object"}};
+  const res=await fetch(c.base+"/chat/completions",{
+    method:"POST",
+    headers:{"Content-Type":"application/json","Authorization":"Bearer "+c.key},
+    body:JSON.stringify(body)
+  });
+  if(!res.ok){ const t=await res.text(); throw new Error("HTTP "+res.status+" "+t.slice(0,140)); }
+  const j=await res.json();
+  let txt=j.choices && j.choices[0] ? j.choices[0].message.content : "";
+  txt=txt.replace(/^```(?:json)?/i,"").replace(/```$/,"").trim();
+  return JSON.parse(txt);
+}
+$("s_aiGen").addEventListener("click",async()=>{
+  const scene=val("s_aiIn").trim(); if(!scene){alert("先填一句话场景");return;}
+  const sys="你是顶尖的 AI 视频分镜提示词专家，熟悉 10 要素结构（主体锁定、动作描述、镜头运动、景别构图、光影氛围、风格一致性、节奏时长、空间关系、首尾帧约束、负面提示词）。请根据用户给的一句话场景，输出 JSON，键为：subject,action,camera,shot,lighting,style,rhythm,spatial,frames,negative,plot。负面词用中文逗号分隔。只输出 JSON，不要解释。";
+  const st=$("s_aiStatus"); st.textContent="生成中…";
+  try{
+    const d=await aiCall([{role:"system",content:sys},{role:"user",content:scene}]);
+    if(!d) return;
+    const map={subject:"s_subject",action:"s_action",camera:"s_camera",shot:"s_shot",lighting:"s_lighting",style:"s_style",rhythm:"s_rhythm",spatial:"s_spatial",frames:"s_frames",negative:"s_negative",plot:"s_plot"};
+    Object.keys(map).forEach(k=>{ if(d[k]!==undefined) $(map[k]).value=d[k]; });
+    renderSingle(); st.textContent="✅ 已生成并填入 10 要素，右侧可复制";
+  }catch(e){ st.textContent="❌ "+e.message; }
+});
+$("f_aiGen").addEventListener("click",async()=>{
+  const scene=val("f_aiIn").trim(); if(!scene){alert("先填一句话场景");return;}
+  const sys="你是顶尖的 AI 视频分镜提示词专家，熟悉「打斗版切片提示词」结构（基础风格锚定词 + 三切片：0-3s开场对峙 / 中段交手 / 高潮绝杀，每片含镜头、场景、人物A、人物B、动作、特效、音频；末尾负面提示词）。请按用户给的一句话场景，输出 JSON，键为：name,dur(数字),quality,art,scene,a,b,line,cam1,act1,fx1,cam2,act2,fx2,cam3,act3,fx3。只输出 JSON，不要解释。";
+  const st=$("f_aiStatus"); st.textContent="生成中…";
+  try{
+    const d=await aiCall([{role:"system",content:sys},{role:"user",content:scene}]);
+    if(!d) return;
+    ["name","dur","quality","art","scene","a","b","line","cam1","act1","fx1","cam2","act2","fx2","cam3","act3","fx3"]
+      .forEach(k=>{ if(d[k]!==undefined && $("f_"+k)) $("f_"+k).value=d[k]; });
+    renderFight(); st.textContent="✅ 已生成并填入，右侧可复制";
+  }catch(e){ st.textContent="❌ "+e.message; }
+});
+["ai_base","ai_key","ai_model"].forEach(id=>$(id).addEventListener("input",saveAiConf));
+(function loadAiConf(){ const c=aiConf(); if(c.base)$("ai_base").value=c.base; if(c.key)$("ai_key").value=c.key; if(c.model)$("ai_model").value=c.model; })();
 
 // init
 addShot({subject:"阿绾，黑发及腰、左眼角泪痣，墨色交领长袍，正对镜头立于画面中下",
