@@ -102,8 +102,9 @@
         <option value="deepseek">DeepSeek · api.deepseek.com（付费，需充值）</option>
         <option value="qwen">通义千问 · dashscope</option>
         <option value="moonshot">Kimi/月之暗面 · moonshot.cn</option>
-        <option value="silicon" selected>硅基流动 SiliconFlow（免费模型免余额，默认）</option>
+        <option value="silicon">硅基流动 SiliconFlow（免费模型免余额）</option>
         <option value="groq">Groq 免费 Llama（免绑卡）</option>
+        <option value="ollama" selected>本地 Ollama（无需 Key，免费，默认）</option>
         <option value="custom">自定义</option>
       </select>
     </div>
@@ -980,14 +981,26 @@ const SINGLE_MAP={subject:"s_subject",action:"s_action",camera:"s_camera",shot:"
 const FIGHT_MAP=["name","dur","quality","art","scene","a","b","line","cam1","act1","fx1","cam2","act2","fx2","cam3","act3","fx3"];
 async function runAi(scene,fmt,statusEl,textOutEl,map,renderFn,jsonOutKey){
   const cfg=AI_FMTS[fmt]||AI_FMTS.single10; if(!cfg) return;
-  const c=aiConf(); if(!c.key){ alert("请先在「AI 联网设置」里填写 API Key"); return; }
-  const body={model:c.model,messages:[{role:"system",content:cfg.sys},{role:"user",content:scene}],temperature:0.8};
-  if(cfg.json) body.response_format={type:"json_object"};
+  const c=aiConf(); const local=/localhost|127\.0\.0\.1/.test(c.base);
+  if(!c.key && !local){ alert("请先在「AI 联网设置」里填写 API Key（本地 Ollama 可留空）"); return; }
+  let url, reqBody;
+  if(local){
+    const baseN=c.base.replace(/\/v1\/?$/,"");
+    url=baseN+"/api/chat";
+    reqBody={model:c.model,messages:[{role:"system",content:cfg.sys},{role:"user",content:scene}],think:false,stream:false};
+    if(cfg.json) reqBody.format="json";
+  } else {
+    url=c.base+"/chat/completions";
+    reqBody={model:c.model,messages:[{role:"system",content:cfg.sys},{role:"user",content:scene}],temperature:0.8};
+    if(cfg.json) reqBody.response_format={type:"json_object"};
+  }
   statusEl.textContent="生成中…";
   try{
-    const res=await fetch(c.base+"/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+c.key},body:JSON.stringify(body)});
+    const headers={"Content-Type":"application/json"}; if(c.key) headers.Authorization="Bearer "+c.key;
+    const res=await fetch(url,{method:"POST",headers,body:JSON.stringify(reqBody)});
     if(!res.ok){ const t=await res.text(); throw new Error("HTTP "+res.status+" "+t.slice(0,140)); }
-    const j=await res.json(); let txt=j.choices && j.choices[0] ? j.choices[0].message.content : "";
+    const j=await res.json();
+    let txt = local ? (j.message ? j.message.content : "") : (j.choices && j.choices[0] ? j.choices[0].message.content : "");
     txt=txt.replace(/^```(?:json)?/i,"").replace(/```$/,"").trim();
     if(cfg.json){
       const d=JSON.parse(txt);
@@ -1035,31 +1048,44 @@ $("s_aiCopy").addEventListener("click",()=>{ navigator.clipboard.writeText($("s_
 $("f_aiCopy").addEventListener("click",()=>{ navigator.clipboard.writeText($("f_aiOut").value).then(()=>alert("已复制 AI 输出")); });
 ["ai_base","ai_key","ai_model"].forEach(id=>$(id).addEventListener("input",saveAiConf));
 (function loadAiConf(){ const c=aiConf(); if(c.base)$("ai_base").value=c.base; if(c.key)$("ai_key").value=c.key; if(c.model)$("ai_model").value=c.model; })();
-(function initPreset(){ if(!localStorage.getItem("ai_base")){ const sel=$("ai_preset"); sel.value="deepseek"; sel.dispatchEvent(new Event("change")); } })();
+(function initPreset(){ if(!localStorage.getItem("ai_base")){ const sel=$("ai_preset"); sel.value="ollama"; sel.dispatchEvent(new Event("change")); } })();
 const AI_PRESETS={
   openai:{base:"https://api.openai.com/v1",model:"gpt-4o-mini"},
   deepseek:{base:"https://api.deepseek.com",model:"deepseek-chat"},
   qwen:{base:"https://dashscope.aliyuncs.com/compatible-mode/v1",model:"qwen-plus"},
   moonshot:{base:"https://api.moonshot.cn/v1",model:"moonshot-v1-8k"},
   silicon:{base:"https://api.siliconflow.cn/v1",model:"Qwen/Qwen2.5-7B-Instruct"},
-  groq:{base:"https://api.groq.com/openai/v1",model:"llama-3.3-70b-versatile"}
+  groq:{base:"https://api.groq.com/openai/v1",model:"llama-3.3-70b-versatile"},
+  ollama:{base:"http://localhost:11434/v1",model:"qwen3.5:latest"}
 };
 $("ai_preset").addEventListener("change",e=>{
   const p=AI_PRESETS[e.target.value];
   if(p){ $("ai_base").value=p.base; $("ai_model").value=p.model; saveAiConf();
-    $("ai_testStatus").textContent="已填入 "+e.target.value+" 预设，填 Key 后点测试连接"; $("ai_testStatus").style.color="var(--muted)"; }
+    const tip=(e.target.value==="ollama")?"（本地运行，Key 可留空）":"，填 Key 后点测试连接";
+    $("ai_testStatus").textContent="已填入 "+e.target.value+" 预设"+tip; $("ai_testStatus").style.color="var(--muted)"; }
 });
 async function testAi(){
   saveAiConf();
   const c=aiConf(); const st=$("ai_testStatus");
   if(!c.base){ st.textContent="先选服务商预设或填 API Base"; st.style.color="var(--warn)"; return; }
-  if(!c.key){ st.textContent="先填 API Key"; st.style.color="var(--warn)"; return; }
+  const local=/localhost|127\.0\.0\.1/.test(c.base);
+  if(!c.key && !local){ st.textContent="先填 API Key（本地 Ollama 可留空）"; st.style.color="var(--warn)"; return; }
   st.textContent="连接中…"; st.style.color="var(--muted)";
   try{
-    const res=await fetch(c.base+"/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+c.key},body:JSON.stringify({model:c.model,messages:[{role:"user",content:"ping"}],temperature:0.1})});
+    let url, tbody;
+    if(local){
+      url=c.base.replace(/\/v1\/?$/,"")+"/api/chat";
+      tbody={model:c.model,messages:[{role:"user",content:"ping"}],think:false,stream:false};
+    } else {
+      url=c.base+"/chat/completions";
+      tbody={model:c.model,messages:[{role:"user",content:"ping"}],temperature:0.1};
+    }
+    const headers={"Content-Type":"application/json"}; if(c.key) headers.Authorization="Bearer "+c.key;
+    const res=await fetch(url,{method:"POST",headers,body:JSON.stringify(tbody)});
     if(!res.ok){ const t=await res.text(); throw new Error("HTTP "+res.status+" "+t.slice(0,140)); }
     const j=await res.json();
-    if(j.choices&&j.choices[0]){ st.textContent="✅ 连接成功（"+c.model+" 可用）"; st.style.color="var(--ok)"; }
+    const ok = local ? (j.message&&j.message.content) : (j.choices&&j.choices[0]);
+    if(ok){ st.textContent="✅ 连接成功（"+c.model+" 可用）"; st.style.color="var(--ok)"; }
     else throw new Error("返回异常："+JSON.stringify(j).slice(0,120));
   }catch(e){
     let msg=e.message||String(e);
