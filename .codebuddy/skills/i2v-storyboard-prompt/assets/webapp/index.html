@@ -979,28 +979,42 @@ const AI_FMTS={
 };
 const SINGLE_MAP={subject:"s_subject",action:"s_action",camera:"s_camera",shot:"s_shot",lighting:"s_lighting",style:"s_style",rhythm:"s_rhythm",spatial:"s_spatial",frames:"s_frames",negative:"s_negative",plot:"s_plot"};
 const FIGHT_MAP=["name","dur","quality","art","scene","a","b","line","cam1","act1","fx1","cam2","act2","fx2","cam3","act3","fx3"];
+async function ollamaLocalChat(model,messages,wantJson){
+  const body={model,messages,think:false,stream:false}; if(wantJson) body.format="json";
+  const attempts=["/ollama/api/chat","http://localhost:11434/api/chat"];
+  let lastErr="本地 Ollama 无响应（确认 Ollama 已启动，并通过本工具自带启动器打开页面）";
+  for(const url of attempts){
+    try{
+      const res=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+      if(res.ok){ const j=await res.json(); if(j&&j.message) return {ok:true,j}; }
+      else { const t=await res.text(); lastErr="HTTP "+res.status+" "+t.slice(0,120); }
+    }catch(e){ lastErr=e.message; }
+    if(url===attempts[0]) continue;
+  }
+  return {ok:false,err:lastErr};
+}
 async function runAi(scene,fmt,statusEl,textOutEl,map,renderFn,jsonOutKey){
   const cfg=AI_FMTS[fmt]||AI_FMTS.single10; if(!cfg) return;
   const c=aiConf(); const local=/localhost|127\.0\.0\.1/.test(c.base);
   if(!c.key && !local){ alert("请先在「AI 联网设置」里填写 API Key（本地 Ollama 可留空）"); return; }
-  let url, reqBody;
-  if(local){
-    const baseN=c.base.replace(/\/v1\/?$/,"");
-    url=baseN+"/api/chat";
-    reqBody={model:c.model,messages:[{role:"system",content:cfg.sys},{role:"user",content:scene}],think:false,stream:false};
-    if(cfg.json) reqBody.format="json";
-  } else {
-    url=c.base+"/chat/completions";
-    reqBody={model:c.model,messages:[{role:"system",content:cfg.sys},{role:"user",content:scene}],temperature:0.8};
-    if(cfg.json) reqBody.response_format={type:"json_object"};
-  }
   statusEl.textContent="生成中…";
+  let txt="";
   try{
-    const headers={"Content-Type":"application/json"}; if(c.key) headers.Authorization="Bearer "+c.key;
-    const res=await fetch(url,{method:"POST",headers,body:JSON.stringify(reqBody)});
-    if(!res.ok){ const t=await res.text(); throw new Error("HTTP "+res.status+" "+t.slice(0,140)); }
-    const j=await res.json();
-    let txt = local ? (j.message ? j.message.content : "") : (j.choices && j.choices[0] ? j.choices[0].message.content : "");
+    if(local){
+      const r=await ollamaLocalChat(c.model,[{role:"system",content:cfg.sys},{role:"user",content:scene}],cfg.json);
+      if(!r.ok) throw new Error(r.err);
+      const j=r.j;
+      txt=(j.message?j.message.content:"")||"";
+    } else {
+      const url=c.base+"/chat/completions";
+      const reqBody={model:c.model,messages:[{role:"system",content:cfg.sys},{role:"user",content:scene}],temperature:0.8};
+      if(cfg.json) reqBody.response_format={type:"json_object"};
+      const headers={"Content-Type":"application/json"}; if(c.key) headers.Authorization="Bearer "+c.key;
+      const res=await fetch(url,{method:"POST",headers,body:JSON.stringify(reqBody)});
+      if(!res.ok){ const t=await res.text(); throw new Error("HTTP "+res.status+" "+t.slice(0,140)); }
+      const j=await res.json();
+      txt=j.choices && j.choices[0] ? j.choices[0].message.content : "";
+    }
     txt=txt.replace(/^```(?:json)?/i,"").replace(/```$/,"").trim();
     if(cfg.json){
       const d=JSON.parse(txt);
@@ -1072,21 +1086,19 @@ async function testAi(){
   if(!c.key && !local){ st.textContent="先填 API Key（本地 Ollama 可留空）"; st.style.color="var(--warn)"; return; }
   st.textContent="连接中…"; st.style.color="var(--muted)";
   try{
-    let url, tbody;
     if(local){
-      url=c.base.replace(/\/v1\/?$/,"")+"/api/chat";
-      tbody={model:c.model,messages:[{role:"user",content:"ping"}],think:false,stream:false};
+      const r=await ollamaLocalChat(c.model,[{role:"user",content:"ping"}],false);
+      if(!r.ok) throw new Error(r.err);
+      if(r.j.message&&r.j.message.content){ st.textContent="✅ 连接成功（"+c.model+" 可用）"; st.style.color="var(--ok)"; }
+      else throw new Error("返回异常："+JSON.stringify(r.j).slice(0,120));
     } else {
-      url=c.base+"/chat/completions";
-      tbody={model:c.model,messages:[{role:"user",content:"ping"}],temperature:0.1};
+      const headers={"Content-Type":"application/json"}; if(c.key) headers.Authorization="Bearer "+c.key;
+      const res=await fetch(c.base+"/chat/completions",{method:"POST",headers,body:JSON.stringify({model:c.model,messages:[{role:"user",content:"ping"}],temperature:0.1})});
+      if(!res.ok){ const t=await res.text(); throw new Error("HTTP "+res.status+" "+t.slice(0,140)); }
+      const j=await res.json();
+      if(j.choices&&j.choices[0]){ st.textContent="✅ 连接成功（"+c.model+" 可用）"; st.style.color="var(--ok)"; }
+      else throw new Error("返回异常："+JSON.stringify(j).slice(0,120));
     }
-    const headers={"Content-Type":"application/json"}; if(c.key) headers.Authorization="Bearer "+c.key;
-    const res=await fetch(url,{method:"POST",headers,body:JSON.stringify(tbody)});
-    if(!res.ok){ const t=await res.text(); throw new Error("HTTP "+res.status+" "+t.slice(0,140)); }
-    const j=await res.json();
-    const ok = local ? (j.message&&j.message.content) : (j.choices&&j.choices[0]);
-    if(ok){ st.textContent="✅ 连接成功（"+c.model+" 可用）"; st.style.color="var(--ok)"; }
-    else throw new Error("返回异常："+JSON.stringify(j).slice(0,120));
   }catch(e){
     let msg=e.message||String(e);
     if(/Failed to fetch|NetworkError|TypeError/.test(msg)){
