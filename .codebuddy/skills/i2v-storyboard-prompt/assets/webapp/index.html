@@ -687,6 +687,13 @@
       </select>
       <button class="btn ghost" id="plot_loadSample" style="font-size:12px;padding:6px 12px">载入</button>
     </div>
+    <div class="lab-sec" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:2px">
+      <span style="font-size:12px;color:var(--muted)">风格预设（点一下填好全局锚定）：</span>
+      <button class="btn ghost plot_stylep" data-s="爽片·一镜到底：电影级写实、HDR 高动态范围、冷蓝霓虹、高速连续运镜、强打击感、粒子丰富、8K 超写实" style="font-size:11px;padding:4px 10px;margin:0">爽片·一镜到底</button>
+      <button class="btn ghost plot_stylep" data-s="科幻灾难：电影级写实科幻、高动态范围、冷调夜色、探照灯暖束、异种生物微光、粒子（尾气/水汽）丰富" style="font-size:11px;padding:4px 10px;margin:0">科幻灾难</button>
+      <button class="btn ghost plot_stylep" data-s="赛博朋克：霓虹都市、高反光金属、体积光 Bloom、雨水物理模拟、OC 渲染 8K" style="font-size:11px;padding:4px 10px;margin:0">赛博朋克</button>
+      <button class="btn ghost plot_stylep" data-s="武侠写意：水墨质感、留白构图、慢镜头、意境光影、电影级胶片感" style="font-size:11px;padding:4px 10px;margin:0">武侠写意</button>
+    </div>
     <div id="plot_status" style="font-size:12px;color:var(--muted);margin:4px 0"></div>
 
     <div id="plot_beats"></div>
@@ -1437,6 +1444,8 @@ function plotLoadSample(){
   plotRenderEps(); plotPersist();
 }
 $("plot_loadSample").addEventListener("click",plotLoadSample);
+// 风格预设：点击填好全局风格锚定
+document.querySelectorAll(".plot_stylep").forEach(b=>b.addEventListener("click",()=>{ $("plot_style").value=b.dataset.s; $("plot_status").textContent="已填入风格预设："+b.textContent; }));
 $("plot_splitBtn").addEventListener("click",plotSplit);
 $("plot_addBtn").addEventListener("click",()=>plotAddCard("",""));
 $("plot_genall").addEventListener("click",plotGenAll);
