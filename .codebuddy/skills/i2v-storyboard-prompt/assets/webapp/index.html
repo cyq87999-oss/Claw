@@ -678,6 +678,15 @@
       <button class="btn ghost" id="plot_addBtn">+ 手动加一镜</button>
       <button class="btn ghost" id="plot_genall">全部 AI 生成</button>
     </div>
+    <div class="lab-sec" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px">
+      <span style="font-size:12px;color:var(--muted)">示例剧本：</span>
+      <select id="plot_sample">
+        <option value="">载入一部示例（新建一集并自动填文案+风格+拆分）</option>
+        <option value="ep1">夜枭·第1集（3个一镜到底片段：入场/大战/绝杀）</option>
+        <option value="ep2">夜枭·第2集（接第1集反转：黑市/擂台/突围）</option>
+      </select>
+      <button class="btn ghost" id="plot_loadSample" style="font-size:12px;padding:6px 12px">载入</button>
+    </div>
     <div id="plot_status" style="font-size:12px;color:var(--muted);margin:4px 0"></div>
 
     <div id="plot_beats"></div>
@@ -1407,6 +1416,27 @@ function plotRestore(){ try{ const s=localStorage.getItem("plot_eps"); if(s){ co
   plotRenderEps();
 })();
 $("plot_newEp").addEventListener("click",plotNewEp);
+// ---- 示例剧本：一键载入整集剧情（每集=几个一镜到底片段），新建一集避免覆盖现有内容 ----
+const SAMPLE_EPS={
+  ep1:{title:"夜枭·第1集",style:"爽片·一镜到底：电影级写实、HDR 高动态范围、冷蓝霓虹、高速连续运镜、强打击感、粒子丰富、8K 超写实",
+    story:"雨夜，夜枭从对面天台索降，沿财阀据点大厦外立面一镜到底俯冲，途中双枪点掉监控探头与巡逻守卫，破窗突入前厅，落地翻滚起身，全程镜头不切。\n\n前厅大厅内，夜枭借巨型吊灯钟摆荡开躲避弹雨，同步平移环绕中连续反杀六名敌人，每一步都踩着爆炸冲击波换位，红白弧光与马赫锥冲击云贯穿全程，镜头始终紧贴主角不切。\n\n顶层天台，夜枭与财阀头目一对一，子弹时间定格飞来的子弹擦过耳畔，慢镜头120格斩下，霓虹冷调下头目坠楼；夜枭拾起阿杰的定位器——反转：定位器显示阿杰早被转移，真正的猎杀才刚开始。"},
+  ep2:{title:"夜枭·第2集",style:"爽片·一镜到底：电影级写实、HDR 高动态范围、冷蓝霓虹、高速连续运镜、强打击感、粒子丰富、8K 超写实",
+    story:"夜枭顺着定位器信号杀入地下黑市，一镜到底穿过人潮与霓虹摊位，途中随手放倒三名拦截者，镜头跟拍不歇。\n\n黑市核心擂台，夜枭与改造拳手一镜到底近身缠斗，借每一次撞击的反冲拔高展翼换位，玻璃四溅与金色灵蕴粒子随击打炸开。\n\n密室救出阿杰瞬间，伏兵涌出，夜枭一镜到底护着阿杰且战且退杀出重围，最后反冲拔高破顶而出——反转：阿杰竟是诱饵，真正目标是夜枭体内的义体核心。"}
+};
+function plotLoadSample(){
+  const k=$("plot_sample").value;
+  if(!k||!SAMPLE_EPS[k]){ alert("先选一个示例剧本"); return; }
+  plotSaveCurrent();
+  const s=SAMPLE_EPS[k];
+  plotEps.push({title:s.title,story:"",style:"",shots:[]});
+  plotEpIdx=plotEps.length-1;
+  $("plot_story").value=s.story; $("plot_style").value=s.style;
+  document.getElementById("plot_beats").innerHTML="";
+  s.story.split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean).forEach(b=>plotAddCard(b,""));
+  $("plot_status").textContent="已新建并载入《"+s.title+"》，点「全部 AI 生成」即可出分镜";
+  plotRenderEps(); plotPersist();
+}
+$("plot_loadSample").addEventListener("click",plotLoadSample);
 $("plot_splitBtn").addEventListener("click",plotSplit);
 $("plot_addBtn").addEventListener("click",()=>plotAddCard("",""));
 $("plot_genall").addEventListener("click",plotGenAll);
