@@ -994,6 +994,14 @@ async function ollamaLocalChat(model,messages,wantJson){
   }
   return {ok:false,err:lastErr};
 }
+function remoteUrls(c){
+  const direct=c.base.replace(/\/+$/,"")+"/chat/completions";
+  if(/ollama\.com/i.test(c.base)){
+    const rel="/ollamacloud"+direct.replace(/^https?:\/\/ollama\.com/i,"");
+    return [rel,direct];
+  }
+  return [direct];
+}
 async function runAi(scene,fmt,statusEl,textOutEl,map,renderFn,jsonOutKey,img){
   const cfg=AI_FMTS[fmt]||AI_FMTS.single10; if(!cfg) return;
   const c=aiConf(); const local=/localhost|127\.0\.0\.1/.test(c.base);
@@ -1009,13 +1017,19 @@ async function runAi(scene,fmt,statusEl,textOutEl,map,renderFn,jsonOutKey,img){
       const j=r.j;
       txt=(j.message?j.message.content:"")||"";
     } else {
-      const url=c.base+"/chat/completions";
       const uContent=img?[{type:"text",text:scene},{type:"image_url",image_url:{url:img}}]:scene;
       const reqBody={model:c.model,messages:[{role:"system",content:cfg.sys},{role:"user",content:uContent}],temperature:0.8};
       if(cfg.json) reqBody.response_format={type:"json_object"};
+      if(/ollama\.com/i.test(c.base)) reqBody.max_tokens=4000;
       const headers={"Content-Type":"application/json"}; if(c.key) headers.Authorization="Bearer "+c.key;
-      const res=await fetch(url,{method:"POST",headers,body:JSON.stringify(reqBody)});
-      if(!res.ok){ const t=await res.text(); throw new Error("HTTP "+res.status+" "+t.slice(0,140)); }
+      let res=null; const urls=remoteUrls(c);
+      for(const u of urls){
+        try{
+          const r=await fetch(u,{method:"POST",headers,body:JSON.stringify(reqBody)});
+          if(r.ok){ res=r; break; }
+          const t=await r.text(); throw new Error("HTTP "+r.status+" "+t.slice(0,140));
+        }catch(e){ if(u===urls[urls.length-1]) throw e; }
+      }
       const j=await res.json();
       txt=j.choices && j.choices[0] ? j.choices[0].message.content : "";
     }
@@ -1098,8 +1112,16 @@ async function testAi(){
       else throw new Error("返回异常："+JSON.stringify(r.j).slice(0,120));
     } else {
       const headers={"Content-Type":"application/json"}; if(c.key) headers.Authorization="Bearer "+c.key;
-      const res=await fetch(c.base+"/chat/completions",{method:"POST",headers,body:JSON.stringify({model:c.model,messages:[{role:"user",content:"ping"}],temperature:0.1})});
-      if(!res.ok){ const t=await res.text(); throw new Error("HTTP "+res.status+" "+t.slice(0,140)); }
+      const tbody={model:c.model,messages:[{role:"user",content:"ping"}],temperature:0.1};
+      if(/ollama\.com/i.test(c.base)) tbody.max_tokens=200;
+      let res=null; const urls=remoteUrls(c);
+      for(const u of urls){
+        try{
+          const r=await fetch(u,{method:"POST",headers,body:JSON.stringify(tbody)});
+          if(r.ok){ res=r; break; }
+          const t=await r.text(); throw new Error("HTTP "+r.status+" "+t.slice(0,140));
+        }catch(e){ if(u===urls[urls.length-1]) throw e; }
+      }
       const j=await res.json();
       if(j.choices&&j.choices[0]){ st.textContent="✅ 连接成功（"+c.model+" 可用）"; st.style.color="var(--ok)"; }
       else throw new Error("返回异常："+JSON.stringify(j).slice(0,120));
