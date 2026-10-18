@@ -1,6 +1,6 @@
 ---
 name: i2v-storyboard-prompt
-description: Generate structured image-to-video (图生视频 / I2V) storyboard prompts for vertical short-form video 9:16, with support for 1–10 reference storyboard images and a plot/narrative layer. This skill should be used when a user wants to turn a character, prop, or scene image into a video-generation prompt, needs a storyboard shot list, asks for 图生视频分镜提示词, 视频生成提示词, 分镜脚本, 竖屏视频提示词, 剧情提示词, or I2V image-to-video prompt, or wants to attach 分镜图 / first-frame images across multiple shots. It enforces 10 mandatory elements (subject lock, action, camera move, shot/composition, lighting, style, rhythm/duration, spatial relation, start-end frame, negative prompt) plus vertical-screen logic, and produces copy-ready prompts compatible with Jimeng/即梦, Kling/可灵, Wan, Seedance, Runway and similar models.
+description: Generate structured image-to-video (图生视频 / I2V) storyboard prompts for vertical short-form video 9:16, and flexibly combine / innovate new camera moves and visual effects. Supports 1–10 reference storyboard images and a plot/narrative layer. Use when the user wants to turn a character, prop, or scene image into a video-generation prompt; needs a storyboard shot list; asks for 图生视频分镜提示词, 视频生成提示词, 分镜脚本, 竖屏视频提示词, 剧情提示词, I2V prompt, Seedance 时间码分镜, 基础设定双层提示词, 打斗版切片提示词, 运镜, 视觉特效; wants to 灵活运用词库/范例创新出新运镜或新特效; or wants to attach 分镜图 / first-frame images across multiple shots. Enforces 10 mandatory elements plus vertical-screen logic, embeds 5 实操铁律 (角色一致性/运镜精准/单核心动作/音画同步/分层调试), and produces copy-ready prompts compatible with Jimeng/即梦, Kling/可灵, Wan, Seedance, Runway.
 ---
 
 # I2V Storyboard Prompt（图生视频分镜提示词）
@@ -13,7 +13,19 @@ elements and respects vertical-screen composition logic, so generated clips stay
 on-character, and on-composition instead of drifting, deforming, or going off-frame.
 
 Use it whenever a user supplies a reference image (or describes one) and wants motion, a shot,
-or a sequence for video generation.
+or a sequence for video generation. When the user asks to **创新运镜 / 视觉特效** or to **灵活运用
+资源**，load `references/innovation.md` and follow the 融合 → 进化 two-step method there.
+
+## Operational Rules（实操铁律 · 必须优先遵守）
+
+These five are distilled from real platform outputs (即梦/Seedance 2.0). Violating any one is the
+most common cause of a failed clip. Enforce them on every prompt.
+
+1. **角色一致性优先** — 全局设定一次性写全角色外观，分镜里不复述/修改长相，防换脸改服装。
+2. **运镜描述要精准** — 用专业运镜词（同步平移环绕、极速变焦、跟焦、环绕仰拍、倒退跟拍），把轨迹按秒焊死角度，解决空间反向/旋转崩坏（参考驼客「摄影机位与空间绝对指令」写法）。
+3. **动作拆分粒度** — 每段镜头**单核心动作**，不在同一时间切片塞过多连续动作，防动作崩坏。
+4. **音效和画面绑定** — 每一条分镜同步写音效（声音行单独成行、拟声词 + “——”拉长），音画同步是 Seedance 2.0 优势。
+5. **分层调试策略** — 先跑【全局设定 + 前 3 个分镜】测画风角色，再追加剩余镜头，勿一次性生成 20s 长镜头。
 
 ## Core Principle: The 10-Element Mandatory Skeleton
 
@@ -73,23 +85,34 @@ character and style strings from the sheet. Generator accepts a `plot` string an
 
 ## Workflow
 
-1. **Confirm inputs.** Identify from the user's request: reference subject (or image description),
-   intended style, desired mood, and whether it is a single shot or a sequence. If a story is
-   implied, capture the **plot layer** (logline + character sheet + emotion arc) first.
-2. **Map images.** For I2V, collect the 1–10 reference images and assign each a role
+1. **Confirm inputs & intent.** Identify from the user's request: reference subject (or image
+   description), intended style, desired mood, single shot vs. sequence, and — crucially — whether
+   the goal is a **standard reliable shot** (assemble) or **novelty / signature move** (innovate).
+   If a story is implied, capture the **plot layer** (logline + character sheet + emotion arc) first.
+2. **Choose the path.**
+   - *Assemble*: continue to steps 3–7 (10-element skeleton + templates).
+   - *Innovate*: load `references/innovation.md`, pool the 运镜骨架 / 视觉特效 assets, fuse locally
+     (or evolve via the webapp 「创新实验室」 AI 跨界创新), then wrap the result in the 10-element
+     frame for delivery.
+3. **Map images.** For I2V, collect the 1–10 reference images and assign each a role
    (首帧图 / 尾帧图 / 参考图) and a target shot. Keep ≤10 total.
-3. **Fill the skeleton.** For each of the 10 elements, write concrete Chinese phrasing. Pull
-   vocabulary from `references/prompt-playbook.md` when stuck. Do not leave placeholders.
-4. **Apply vertical logic.** Run the vertical-screen checks above; adjust composition and action
+4. **Fill the skeleton (obey the 5 Operational Rules).** For each of the 10 elements write concrete
+   Chinese phrasing. **Apply the rules as gates**: write character look once globally (规则1); use
+   precise camera-move terms with degree-locked trajectories (规则2); one core action per shot
+   (规则3); attach a sound line to every shot (规则4); plan a staged debug (全局+前3镜 first,
+   规则5). Pull vocabulary from `references/prompt-playbook.md` / `references/innovation.md` when stuck.
+   Do not leave placeholders.
+5. **Apply vertical logic.** Run the vertical-screen checks above; adjust composition and action
    wording so nothing exits frame horizontally.
-5. **Assemble with the template.** Use the canonical order below to join elements into one prompt
+6. **Assemble with the template.** Use the canonical order below to join elements into one prompt
    string. Quote the reference image / previous end frame where continuity matters, and prepend the
    `【剧情】` block for a sequence.
-6. **(Optional) Use the generator.** For batch or guaranteed-completeness output, run
+7. **(Optional) Use the generator.** For batch or guaranteed-completeness output, run
    `scripts/generate_prompt.py` with a JSON of the 10 fields plus optional `plot` and `images`
    — it enforces structure, applies vertical logic, and flags any missing element.
-7. **Deliver copy-ready text.** Output the final prompt plus a one-line plain-language
-   explanation of the shot for the user, and list which image file(s) to upload for each shot.
+8. **Deliver copy-ready text.** Output the final prompt plus a one-line plain-language
+   explanation of the shot for the user, and list which image file(s) to upload for each shot. For
+   innovate-mode, also name the fused assets and the fusion mechanism so the user can re-tune.
 
 ### Canonical Template（模板示例）
 
@@ -114,8 +137,33 @@ For a sequence, prepend a single `【剧情】` block (logline) and keep `首尾
 adjacent shots (shot N's end frame = shot N+1's start frame). The end-frame image of shot N is the
 first-frame / reference image of shot N+1.
 
+## Flexible Use & Innovation（灵活运用与跨界创新）
+
+The skill is not only a 10-element assembler — it is also a **resource-combination and innovation
+engine**. When the user wants to go beyond templates and create *new* camera moves / new visual
+effects, follow the two-step method in `references/innovation.md`:
+
+1. **Pool the resources.** Break the vocab banks, worked examples (Vol.2), and templates into two
+   reusable asset classes: a **运镜骨架库 (camera-move skeletons)** and a **视觉特效库 (VFX
+   coatings)**. Both pools are enumerated in `references/innovation.md` (14 camera moves + 14 VFX).
+2. **Fuse (deterministic).** Pick 1–N camera skeletons + 1–N VFX, set a base scene, and overlay:
+   the camera move is the bone, the VFX triggers at the skeleton's ~60% climax node and couples
+   physically (motion + burst in one shot). Multiple skeletons chain by timecode; each cut uses one
+   VFX as a visual transition. This runs locally in the webapp 「创新实验室」 tab → 「生成融合预览」.
+3. **Evolve via AI (1+1>2).** Feed the chosen assets + base scene to an OpenAI-compatible model
+   (the webapp's 「AI 跨界创新」, needs a Key) and ask it to *hybridize* a brand-new camera+VFX
+   combo — coupling A's trajectory with B's effect to trigger a chain reaction at a given second,
+   not a naive splice. Output JSON: name / camera / vfx / fusion / prompt.
+
+**When to innovate vs. assemble:** use the 10-element skeleton + templates for standard, reliable
+shots; switch to the 融合/进化 path when the user explicitly wants novelty, a signature move, or to
+remix existing references into something not seen before. Always still obey the 5 Operational Rules.
+
 ## Resources
 
+- `references/innovation.md` — **灵活运用与跨界创新层**：5 条实操铁律、运镜骨架库(14) + 视觉特效库(14)、
+  融合机制（骨架叠加/多骨架串联/随机碰撞）、AI 跨界创新 JSON 规范、四种主流结构速查、实战范例索引。
+  **当目标是创新运镜/特效、或要灵活运用资源时必加载。**
 - `references/prompt-playbook.md` — vocabulary banks and rules for every element (camera moves,
   shot sizes, lighting, styles, negative prompts, continuity). Load when drafting or when the user
   wants richer phrasing.
