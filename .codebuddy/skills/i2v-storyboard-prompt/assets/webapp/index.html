@@ -82,6 +82,7 @@
   <div class="tabs">
     <div class="tab active" data-tab="single">单镜生成</div>
     <div class="tab" data-tab="seq">多镜序列</div>
+    <div class="tab" data-tab="fight">打斗版</div>
   </div>
 
   <!-- 单镜 -->
@@ -249,6 +250,60 @@
         <button class="btn" id="seq_copy">复制全部提示词</button>
       </div>
       <div class="preview" id="seq_preview" style="margin-top:12px"></div>
+    </div>
+  </div>
+
+  <!-- 打斗版 -->
+  <div id="fight" class="tabpanel" style="display:none">
+    <div class="layout">
+      <div class="card">
+        <h2>打斗版生成器 · 填关键项</h2>
+        <div class="field"><label><b>段落名称</b></label>
+          <input id="f_name" placeholder="如：黄沙对峙 · 狂风嘲讽" /></div>
+        <div class="field"><label><b>总时长（秒）</b></label>
+          <input id="f_dur" value="10" /></div>
+        <div class="field"><label><b>画质定义</b></label>
+          <input id="f_quality" value="10秒极致3D动作大片" /></div>
+        <div class="field"><label><b>美术风格</b></label>
+          <input id="f_art" value="黑神话写实风" /></div>
+        <div class="field"><label><b>场景</b> 三切片共用保持一致</label>
+          <textarea id="f_scene" rows="2" placeholder="如：漫天黄沙的黄风岭，风化的巨大戈壁石柱，半掩在沙中的残破佛像"></textarea></div>
+        <div class="field"><label><b>人物A</b> 外观+装备+姿态</label>
+          <textarea id="f_a" rows="2" placeholder="如：白衣黑裤的新弘武士（尾巴黑玫瑰斑纹），双手握紧武士刀压低重心"></textarea></div>
+        <div class="field"><label><b>人物B</b> 外观+装备+姿态（对手/BOSS）</label>
+          <textarea id="f_b" rows="2" placeholder="如：身披破旧披风、手持三股钢叉的BOSS黄风大圣"></textarea></div>
+        <div class="field"><label><b>台词</b>（留空 = 纯战斗音效，无对白，放在切片1）</label>
+          <textarea id="f_line" rows="2" placeholder="如：哼，哪来的小崽子？死来！"></textarea></div>
+
+        <div class="field"><label><b>切片1（0-3s 开场对峙）</b> 镜头类型</label>
+          <input id="f_cam1" value="大远景" /></div>
+        <div class="field"><label>切片1 动作</label>
+          <textarea id="f_act1" rows="2" placeholder="如：双方对峙，人物B钢叉猛砸地面挑衅，人物A压低重心蓄势"></textarea></div>
+        <div class="field"><label>切片1 特效</label>
+          <input id="f_fx1" placeholder="如：黄沙弥漫，狂风粒子，丁达尔光" /></div>
+
+        <div class="field"><label><b>切片2（中段交手）</b> 镜头类型</label>
+          <input id="f_cam2" value="极速动态追踪" /></div>
+        <div class="field"><label>切片2 动作</label>
+          <textarea id="f_act2" rows="2" placeholder="如：高频对砍数十次，火花混杂冰晶四溅，腾空连斩"></textarea></div>
+        <div class="field"><label>切片2 特效</label>
+          <input id="f_fx2" placeholder="如：刀光残影，火花冰晶，冲击波" /></div>
+
+        <div class="field"><label><b>切片3（高潮绝杀）</b> 镜头类型</label>
+          <input id="f_cam3" value="环绕仰拍" /></div>
+        <div class="field"><label>切片3 动作</label>
+          <textarea id="f_act3" rows="2" placeholder="如：蓄力凝成巨大冰刃，垂直坠击，冲击波冻结全场，冰雕碎裂"></textarea></div>
+        <div class="field"><label>切片3 特效</label>
+          <input id="f_fx3" placeholder="如：极寒光刃，音爆冲击波，碎裂金色光点" /></div>
+      </div>
+      <div class="card">
+        <h2>实时预览（打斗版切片提示词）</h2>
+        <div class="row" style="margin-bottom:8px">
+          <button class="btn" id="f_copy">复制提示词</button>
+        </div>
+        <div class="preview" id="f_preview" style="min-height:420px"></div>
+        <div style="margin-top:8px;font-size:12px;color:var(--muted)">动作细节需你填——本工具是本地表单组装器，不联网无 AI；填得越具体，产出的提示词越能直接喂给即梦/可灵。</div>
+      </div>
     </div>
   </div>
 </div>
@@ -467,10 +522,64 @@ document.querySelectorAll(".tab").forEach(t=>{
     const which=t.dataset.tab;
     $("single").style.display=which==="single"?"block":"none";
     $("seq").style.display=which==="seq"?"block":"none";
+    $("fight").style.display=which==="fight"?"block":"none";
   });
 });
 $("addShot").addEventListener("click",()=>addShot());
 $("seq_copy").addEventListener("click",()=>{ navigator.clipboard.writeText($("seq_preview").textContent).then(()=>alert("已复制全部提示词")); });
+
+// ---- 打斗版生成器 ----
+const FIGHT_NEG="模糊，变形，肢体扭曲，手部崩坏，角色换脸，场景突变，画面闪烁，低分辨率，卡通二次元，多余肢体，文字水印";
+function renderFight(){
+  const name=val("f_name")||"未命名段落";
+  const dur=parseInt(val("f_dur"),10)||10;
+  const q=val("f_quality")||"10秒极致3D动作大片";
+  const art=val("f_art")||"黑神话写实风";
+  const scene=val("f_scene")||"【场景环境，保持前后切片一致】";
+  const a=val("f_a")||"【人物A：外观+装备+姿态】";
+  const b=val("f_b")||"【人物B：外观+装备+姿态】";
+  const line=val("f_line");
+  const s2=Math.max(4,Math.round(dur*0.6));
+  const audio1=line?`环境音 + 台词：「${line}」`:"环境音，无对白";
+  const out=
+`【${name}｜总时长 ${dur}s】
+基础风格锚定词：${q}，${art}，电影级光影，真实材质，强动态镜头，史诗战斗氛围，连贯动作，高细节，物理真实，强打击感
+
+【0-3s 开场对峙】
+镜头：${val("f_cam1")||"大远景"}
+场景：${scene}
+人物A：${a}
+人物B：${b}
+动作：${val("f_act1")||"【开场对峙：双方试探，人物B挑衅，人物A蓄势】"}
+特效：${val("f_fx1")||"环境特效、光效、粒子"}
+音频：${audio1}
+
+【3-${s2}s 中段交手】
+镜头：${val("f_cam2")||"极速动态追踪"}
+场景：场景延续，${scene}
+人物A：${a}
+人物B：${b}
+动作：${val("f_act2")||"【中段交手：高频对砍，攻防转换，火花四溅】"}
+特效：${val("f_fx2")||"战斗特效：刀光残影、火花、冲击波"}
+音频：纯战斗音效，无对白
+
+【${s2}-${dur}s 高潮绝杀】
+镜头：${val("f_cam3")||"环绕仰拍"}
+场景：场景延续，${scene}
+人物A：${a}
+人物B：${b}
+动作：${val("f_act3")||"【绝杀：蓄力大招，一击定胜负】"}
+特效：${val("f_fx3")||"大招特效：冻结、碎裂、光点"}
+音频：音爆 + 低频轰鸣 + 碎裂音效
+
+负面提示词：${FIGHT_NEG}`;
+  $("f_preview").textContent=out;
+}
+["f_name","f_dur","f_quality","f_art","f_scene","f_a","f_b","f_line",
+ "f_cam1","f_act1","f_fx1","f_cam2","f_act2","f_fx2","f_cam3","f_act3","f_fx3"]
+ .forEach(id=>$(id).addEventListener("input",renderFight));
+$("f_copy").addEventListener("click",()=>{ navigator.clipboard.writeText($("f_preview").textContent).then(()=>alert("已复制打斗提示词")); });
+renderFight();
 
 // init
 addShot({subject:"阿绾，黑发及腰、左眼角泪痣，墨色交领长袍，正对镜头立于画面中下",
