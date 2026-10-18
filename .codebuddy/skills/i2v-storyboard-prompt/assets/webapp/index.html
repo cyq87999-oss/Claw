@@ -656,6 +656,12 @@
       <b style="color:var(--txt)">先写剧情，再拆分镜，按剧情生成/编辑提示词</b>——避免提示词跑偏。流程：① 写<strong>剧情文案</strong>（整段故事/旁白）→ ② 选<strong>拆分方式</strong>一键拆成<strong>分镜剧情</strong> → ③ 对每镜「AI 生成提示词」（AI 严格贴合该镜剧情，不擅自加戏）→ ④ 导出完整分镜脚本（含【剧情文案】锚定块）。
     </div>
 
+    <div class="lab-sec" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:4px">
+      <span style="font-size:12px;color:var(--muted)">剧集：</span>
+      <div id="plot_eps" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+      <button class="btn ghost" id="plot_newEp" style="font-size:12px;padding:4px 10px;margin:0">＋ 新一集</button>
+    </div>
+
     <div class="lab-sec">
       <label>① 剧情文案（整体故事 / 旁白 / 梗概，越具体越不易跑偏）</label>
       <textarea id="plot_story" rows="5" placeholder="如：少女阿绾为报灭门之仇，雨夜潜入古堡。第一镜她立于门前深吸一口气；第二镜推门而入，烛火骤明；第三镜与黑袍杀手对峙拔剑……"></textarea>
@@ -1346,6 +1352,61 @@ function plotExport(){
   $("plot_copy").style.display="inline-block";
   $("plot_status").textContent="✅ 已生成完整分镜脚本，可复制";
 }
+// ---- 剧集管理：多集切换 + 本地持久化（刷新不丢；图片为临时参考不持久化） ----
+let plotEps=[{title:"第1集",story:"",style:"",shots:[]}];
+let plotEpIdx=0;
+function plotSerialize(){
+  const cards=[...document.querySelectorAll("#plot_beats .plot-card")];
+  return { story:$("plot_story").value, style:$("plot_style").value,
+    shots:cards.map(c=>({beat:c.querySelector(".p_beat").value,prompt:c.querySelector(".p_prompt").value})) };
+}
+function plotSaveCurrent(){
+  const d=plotSerialize();
+  if(!plotEps[plotEpIdx]) plotEps[plotEpIdx]={title:"第"+(plotEpIdx+1)+"集"};
+  plotEps[plotEpIdx].story=d.story; plotEps[plotEpIdx].style=d.style; plotEps[plotEpIdx].shots=d.shots;
+}
+function plotRenderEps(){
+  const box=$("plot_eps"); box.innerHTML="";
+  plotEps.forEach((e,i)=>{
+    const chip=document.createElement("button");
+    chip.className="btn ghost";
+    chip.style.cssText="font-size:12px;padding:4px 10px;margin:0"+(i===plotEpIdx?";background:var(--accent);color:#06121f;border-color:var(--accent)":"");
+    chip.textContent=e.title||("第"+(i+1)+"集");
+    chip.addEventListener("click",()=>plotLoadEp(i));
+    box.appendChild(chip);
+  });
+}
+function plotLoadEp(i){
+  if(i===plotEpIdx) return;
+  plotSaveCurrent(); plotEpIdx=i;
+  const e=plotEps[i]||{title:"第"+(i+1)+"集",story:"",style:"",shots:[]};
+  $("plot_story").value=e.story||""; $("plot_style").value=e.style||"";
+  document.getElementById("plot_beats").innerHTML="";
+  (e.shots||[]).forEach(s=>plotAddCard(s.beat||"",s.prompt||""));
+  $("plot_status").textContent="已切换到 "+(e.title||("第"+(i+1)+"集"));
+  plotRenderEps(); plotPersist();
+}
+function plotNewEp(){
+  plotSaveCurrent();
+  plotEps.push({title:"第"+(plotEps.length+1)+"集",story:"",style:"",shots:[]});
+  plotEpIdx=plotEps.length-1;
+  $("plot_story").value=""; $("plot_style").value="";
+  document.getElementById("plot_beats").innerHTML="";
+  $("plot_status").textContent="已新建 "+plotEps[plotEpIdx].title+"，开始写第二集吧";
+  plotRenderEps(); plotPersist();
+}
+function plotPersist(){ try{ localStorage.setItem("plot_eps",JSON.stringify(plotEps)); }catch(e){} }
+function plotRestore(){ try{ const s=localStorage.getItem("plot_eps"); if(s){ const a=JSON.parse(s); if(Array.isArray(a)&&a.length) plotEps=a; } }catch(e){} }
+(function plotInit(){
+  plotRestore();
+  if(!plotEps.length) plotEps=[{title:"第1集",story:"",style:"",shots:[]}];
+  plotEpIdx=0; const e=plotEps[0];
+  $("plot_story").value=e.story||""; $("plot_style").value=e.style||"";
+  document.getElementById("plot_beats").innerHTML="";
+  (e.shots||[]).forEach(s=>plotAddCard(s.beat||"",s.prompt||""));
+  plotRenderEps();
+})();
+$("plot_newEp").addEventListener("click",plotNewEp);
 $("plot_splitBtn").addEventListener("click",plotSplit);
 $("plot_addBtn").addEventListener("click",()=>plotAddCard("",""));
 $("plot_genall").addEventListener("click",plotGenAll);
