@@ -144,6 +144,7 @@
           <option value="seedance">Seedance 时间码</option>
         </select>
         <button class="btn" id="s_aiGen">AI 生成</button>
+        <button class="btn ghost" id="s_demo" title="不连 API，本地示例数据一键填充">示例填充</button>
       </div>
       <div id="s_aiStatus" style="font-size:12px;color:var(--muted);margin-top:6px"></div>
       <textarea id="s_aiOut" rows="6" readonly style="display:none;margin-top:8px;width:100%;background:#0a0c12;color:#d7e3f4;border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-size:12px;font-family:monospace"></textarea>
@@ -1009,6 +1010,24 @@ async function runAi(scene,fmt,statusEl,textOutEl,map,renderFn,jsonOutKey){
 }
 $("s_aiGen").addEventListener("click",()=>{ const sc=$("s_aiIn").value.trim(); if(!sc){alert("先填一句话场景");return;}
   runAi(sc,$("s_fmt").value,$("s_aiStatus"),$("s_aiOut"),SINGLE_MAP,renderSingle); });
+$("s_demo").addEventListener("click",()=>{
+  const demo={
+    subject:"柳如烟，黑发高马尾、额间花钿、墨色劲装束袖，正对镜头立于画面前三分之一",
+    action:"右手缓缓握剑柄匀速抽出半寸，剑身寒光渐亮，衣摆随气劲微扬",
+    camera:"镜头从腰部缓摇上升至面部特写，末段极缓推近",
+    shot:"特写，面部占70%，头顶留白，居中",
+    lighting:"冷蓝逆光，雨夜，地面霓虹反光，高对比",
+    style:"国风漫剧、厚涂笔触、电影感、细节丰富、统一美术风格",
+    rhythm:"6 秒，前 2 秒蓄势静止，后 4 秒拔剑渐紧",
+    spatial:"人物距镜头约 1 米，身后 3 米为朱红宫门，左右对称廊柱",
+    frames:"首帧：垂手静立；尾帧：剑出半寸、寒光及眉",
+    negative:DEFAULT_NEG.join("，"),
+    plot:"柳如烟与柳如霜皇宫内打斗一镜到底（剧情锚定，防止跑偏）"
+  };
+  Object.keys(SINGLE_MAP).forEach(k=>{ if(demo[k]!==undefined) $(SINGLE_MAP[k]).value=demo[k]; });
+  renderSingle();
+  $("s_aiStatus").textContent="✅ 已填入本地示例（无需 API），右侧可复制；配好 Key 后可用「AI 生成」按你的场景定制";
+});
 $("f_aiGen").addEventListener("click",()=>{ const sc=$("f_aiIn").value.trim(); if(!sc){alert("先填一句话场景");return;}
   runAi(sc,$("f_fmt").value,$("f_aiStatus"),$("f_aiOut"),FIGHT_MAP,renderFight); });
 $("s_aiCopy").addEventListener("click",()=>{ navigator.clipboard.writeText($("s_aiOut").value).then(()=>alert("已复制 AI 输出")); });
