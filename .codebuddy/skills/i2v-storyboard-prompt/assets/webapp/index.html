@@ -112,12 +112,19 @@
     </div>
 
     <div class="ai-gen" style="border:1px solid var(--line);border-radius:8px;padding:10px;margin:10px 0">
-      <label style="font-size:12px;color:var(--muted)">一句话场景 → AI 自动生成 10 要素提示词（需先在上方「AI 联网设置」填 Key）</label>
+      <label style="font-size:12px;color:var(--muted)">一句话场景 → AI 自动生成（需先在上方「AI 联网设置」填 Key）</label>
       <div style="display:flex;gap:8px;margin-top:6px">
         <textarea id="s_aiIn" rows="2" placeholder="如：柳如烟与柳如霜在皇宫内持剑打斗，一镜到底，国风写实" style="flex:1"></textarea>
+        <select id="s_fmt" style="width:150px">
+          <option value="single10">10 要素</option>
+          <option value="basicset">基础设定双层</option>
+          <option value="seedance">Seedance 时间码</option>
+        </select>
         <button class="btn" id="s_aiGen">AI 生成</button>
       </div>
       <div id="s_aiStatus" style="font-size:12px;color:var(--muted);margin-top:6px"></div>
+      <textarea id="s_aiOut" rows="6" readonly style="display:none;margin-top:8px;width:100%;background:#0a0c12;color:#d7e3f4;border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-size:12px;font-family:monospace"></textarea>
+      <button class="btn ghost" id="s_aiCopy" style="display:none;margin-top:6px;font-size:12px;padding:6px 12px">复制 AI 输出</button>
     </div>
 
     <div class="layout">
@@ -353,12 +360,19 @@
       <div class="card">
         <h2>打斗版生成器 · 填关键项</h2>
         <div class="ai-gen" style="border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:12px">
-          <label style="font-size:12px;color:var(--muted)">一句话场景 → AI 自动生成打斗版（需先在上方「AI 联网设置」填 Key）</label>
+          <label style="font-size:12px;color:var(--muted)">一句话场景 → AI 自动生成（需先在上方「AI 联网设置」填 Key）</label>
           <div style="display:flex;gap:8px;margin-top:6px">
             <textarea id="f_aiIn" rows="2" placeholder="如：柳如烟与柳如霜在皇宫内持剑打斗，一镜到底，国风写实，含嘲讽台词" style="flex:1"></textarea>
+            <select id="f_fmt" style="width:150px">
+              <option value="fight">打斗版</option>
+              <option value="basicset">基础设定双层</option>
+              <option value="seedance">Seedance 时间码</option>
+            </select>
             <button class="btn" id="f_aiGen">AI 生成</button>
           </div>
           <div id="f_aiStatus" style="font-size:12px;color:var(--muted);margin-top:6px"></div>
+          <textarea id="f_aiOut" rows="6" readonly style="display:none;margin-top:8px;width:100%;background:#0a0c12;color:#d7e3f4;border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-size:12px;font-family:monospace"></textarea>
+          <button class="btn ghost" id="f_aiCopy" style="display:none;margin-top:6px;font-size:12px;padding:6px 12px">复制 AI 输出</button>
         </div>
         <div class="field"><label><b>段落名称</b></label>
           <input id="f_name" placeholder="如：黄沙对峙 · 狂风嘲讽" /></div>
@@ -694,45 +708,46 @@ function saveAiConf(){
   localStorage.setItem("ai_key",$("ai_key").value.trim());
   localStorage.setItem("ai_model",$("ai_model").value.trim());
 }
-async function aiCall(messages){
-  const c=aiConf();
-  if(!c.key){ alert("请先在「AI 联网设置」里填写 API Key"); return null; }
-  const body={model:c.model,messages:messages,temperature:0.8,response_format:{type:"json_object"}};
-  const res=await fetch(c.base+"/chat/completions",{
-    method:"POST",
-    headers:{"Content-Type":"application/json","Authorization":"Bearer "+c.key},
-    body:JSON.stringify(body)
-  });
-  if(!res.ok){ const t=await res.text(); throw new Error("HTTP "+res.status+" "+t.slice(0,140)); }
-  const j=await res.json();
-  let txt=j.choices && j.choices[0] ? j.choices[0].message.content : "";
-  txt=txt.replace(/^```(?:json)?/i,"").replace(/```$/,"").trim();
-  return JSON.parse(txt);
+const AI_FMTS={
+  single10:{json:true,sys:"你是顶尖的 AI 视频分镜提示词专家，熟悉 10 要素结构（主体锁定、动作描述、镜头运动、景别构图、光影氛围、风格一致性、节奏时长、空间关系、首尾帧约束、负面提示词）。请根据用户给的一句话场景，输出 JSON，键为：subject,action,camera,shot,lighting,style,rhythm,spatial,frames,negative,plot。负面词用中文逗号分隔。只输出 JSON，不要解释。"},
+  fight:{json:true,sys:"你是顶尖的 AI 视频分镜提示词专家，熟悉「打斗版切片提示词」结构（基础风格锚定词 + 三切片：0-3s开场对峙 / 中段交手 / 高潮绝杀，每片含镜头、场景、人物A、人物B、动作、特效、音频；末尾负面提示词）。请按用户给的一句话场景，输出 JSON，键为：name,dur(数字),quality,art,scene,a,b,line,cam1,act1,fx1,cam2,act2,fx2,cam3,act3,fx3。只输出 JSON，不要解释。"},
+  basicset:{json:false,sys:"你是顶尖的 AI 视频分镜提示词专家，熟悉「基础设定+画面内容」双层模板：先写【基础设定】（锁定角色外观/服装/坐骑/场景/光线/破坏状态/表情机制）+【氛围与画质】，再写【画面内容】（多个片段，每片段含景别/构图/运镜/画面内容），末附负面提示词。请直接输出完整提示词纯文本，不要 JSON，不要解释，不要加 markdown 围栏。"},
+  seedance:{json:false,sys:"你是顶尖的 AI 视频分镜提示词专家，熟悉 Seedance 时间码分镜：每镜格式为「镜头 0N【起始s-结束s】景别 / 运镜」+「画面视图：…」+「声音设计：…」，多镜时间码递进。请直接输出完整提示词纯文本，不要 JSON，不要解释，不要加 markdown 围栏。"}
+};
+const SINGLE_MAP={subject:"s_subject",action:"s_action",camera:"s_camera",shot:"s_shot",lighting:"s_lighting",style:"s_style",rhythm:"s_rhythm",spatial:"s_spatial",frames:"s_frames",negative:"s_negative",plot:"s_plot"};
+const FIGHT_MAP=["name","dur","quality","art","scene","a","b","line","cam1","act1","fx1","cam2","act2","fx2","cam3","act3","fx3"];
+async function runAi(scene,fmt,statusEl,textOutEl,map,renderFn){
+  const cfg=AI_FMTS[fmt]||AI_FMTS.single10; if(!cfg) return;
+  const c=aiConf(); if(!c.key){ alert("请先在「AI 联网设置」里填写 API Key"); return; }
+  const body={model:c.model,messages:[{role:"system",content:cfg.sys},{role:"user",content:scene}],temperature:0.8};
+  if(cfg.json) body.response_format={type:"json_object"};
+  statusEl.textContent="生成中…";
+  try{
+    const res=await fetch(c.base+"/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+c.key},body:JSON.stringify(body)});
+    if(!res.ok){ const t=await res.text(); throw new Error("HTTP "+res.status+" "+t.slice(0,140)); }
+    const j=await res.json(); let txt=j.choices && j.choices[0] ? j.choices[0].message.content : "";
+    txt=txt.replace(/^```(?:json)?/i,"").replace(/```$/,"").trim();
+    if(cfg.json){
+      const d=JSON.parse(txt);
+      if(map){
+        if(Array.isArray(map)) map.forEach(k=>{ if(d[k]!==undefined && $("f_"+k)) $("f_"+k).value=d[k]; });
+        else Object.keys(map).forEach(k=>{ if(d[k]!==undefined) $(map[k]).value=d[k]; });
+      }
+      if(renderFn) renderFn();
+      statusEl.textContent="✅ 已生成并填入，右侧可复制";
+    } else {
+      textOutEl.value=txt; textOutEl.style.display="block";
+      const cp=textOutEl.nextElementSibling; if(cp) cp.style.display="inline-block";
+      statusEl.textContent="✅ 已生成，下方可复制（也可微调后使用）";
+    }
+  }catch(e){ statusEl.textContent="❌ "+e.message; }
 }
-$("s_aiGen").addEventListener("click",async()=>{
-  const scene=val("s_aiIn").trim(); if(!scene){alert("先填一句话场景");return;}
-  const sys="你是顶尖的 AI 视频分镜提示词专家，熟悉 10 要素结构（主体锁定、动作描述、镜头运动、景别构图、光影氛围、风格一致性、节奏时长、空间关系、首尾帧约束、负面提示词）。请根据用户给的一句话场景，输出 JSON，键为：subject,action,camera,shot,lighting,style,rhythm,spatial,frames,negative,plot。负面词用中文逗号分隔。只输出 JSON，不要解释。";
-  const st=$("s_aiStatus"); st.textContent="生成中…";
-  try{
-    const d=await aiCall([{role:"system",content:sys},{role:"user",content:scene}]);
-    if(!d) return;
-    const map={subject:"s_subject",action:"s_action",camera:"s_camera",shot:"s_shot",lighting:"s_lighting",style:"s_style",rhythm:"s_rhythm",spatial:"s_spatial",frames:"s_frames",negative:"s_negative",plot:"s_plot"};
-    Object.keys(map).forEach(k=>{ if(d[k]!==undefined) $(map[k]).value=d[k]; });
-    renderSingle(); st.textContent="✅ 已生成并填入 10 要素，右侧可复制";
-  }catch(e){ st.textContent="❌ "+e.message; }
-});
-$("f_aiGen").addEventListener("click",async()=>{
-  const scene=val("f_aiIn").trim(); if(!scene){alert("先填一句话场景");return;}
-  const sys="你是顶尖的 AI 视频分镜提示词专家，熟悉「打斗版切片提示词」结构（基础风格锚定词 + 三切片：0-3s开场对峙 / 中段交手 / 高潮绝杀，每片含镜头、场景、人物A、人物B、动作、特效、音频；末尾负面提示词）。请按用户给的一句话场景，输出 JSON，键为：name,dur(数字),quality,art,scene,a,b,line,cam1,act1,fx1,cam2,act2,fx2,cam3,act3,fx3。只输出 JSON，不要解释。";
-  const st=$("f_aiStatus"); st.textContent="生成中…";
-  try{
-    const d=await aiCall([{role:"system",content:sys},{role:"user",content:scene}]);
-    if(!d) return;
-    ["name","dur","quality","art","scene","a","b","line","cam1","act1","fx1","cam2","act2","fx2","cam3","act3","fx3"]
-      .forEach(k=>{ if(d[k]!==undefined && $("f_"+k)) $("f_"+k).value=d[k]; });
-    renderFight(); st.textContent="✅ 已生成并填入，右侧可复制";
-  }catch(e){ st.textContent="❌ "+e.message; }
-});
+$("s_aiGen").addEventListener("click",()=>{ const sc=$("s_aiIn").value.trim(); if(!sc){alert("先填一句话场景");return;}
+  runAi(sc,$("s_fmt").value,$("s_aiStatus"),$("s_aiOut"),SINGLE_MAP,renderSingle); });
+$("f_aiGen").addEventListener("click",()=>{ const sc=$("f_aiIn").value.trim(); if(!sc){alert("先填一句话场景");return;}
+  runAi(sc,$("f_fmt").value,$("f_aiStatus"),$("f_aiOut"),FIGHT_MAP,renderFight); });
+$("s_aiCopy").addEventListener("click",()=>{ navigator.clipboard.writeText($("s_aiOut").value).then(()=>alert("已复制 AI 输出")); });
+$("f_aiCopy").addEventListener("click",()=>{ navigator.clipboard.writeText($("f_aiOut").value).then(()=>alert("已复制 AI 输出")); });
 ["ai_base","ai_key","ai_model"].forEach(id=>$(id).addEventListener("input",saveAiConf));
 (function loadAiConf(){ const c=aiConf(); if(c.base)$("ai_base").value=c.base; if(c.key)$("ai_key").value=c.key; if(c.model)$("ai_model").value=c.model; })();
 
