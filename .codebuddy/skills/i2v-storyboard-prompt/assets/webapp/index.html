@@ -90,6 +90,7 @@
     <div class="tab" data-tab="seq">多镜序列</div>
     <div class="tab" data-tab="fight">打斗版</div>
     <div class="tab" data-tab="lab">创新实验室</div>
+    <div class="tab" data-tab="plot">剧情工坊</div>
   </div>
 
   <details class="ai-set" style="margin:10px 0">
@@ -631,6 +632,37 @@
     <textarea id="labOut" rows="12" readonly style="display:none;width:100%;background:#0a0c12;color:#d7e3f4;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:12px;font-family:monospace;white-space:pre-wrap"></textarea>
     <button class="btn ghost" id="labCopy" style="display:none;margin-top:6px;font-size:12px;padding:6px 12px">复制方案</button>
   </div>
+  <div id="plot" class="tabpanel" style="display:none">
+    <div class="intro" style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:6px">
+      <b style="color:var(--txt)">先写剧情，再拆分镜，按剧情生成/编辑提示词</b>——避免提示词跑偏。流程：① 写<strong>剧情文案</strong>（整段故事/旁白）→ ② 选<strong>拆分方式</strong>一键拆成<strong>分镜剧情</strong> → ③ 对每镜「AI 生成提示词」（AI 严格贴合该镜剧情，不擅自加戏）→ ④ 导出完整分镜脚本（含【剧情文案】锚定块）。
+    </div>
+
+    <div class="lab-sec">
+      <label>① 剧情文案（整体故事 / 旁白 / 梗概，越具体越不易跑偏）</label>
+      <textarea id="plot_story" rows="5" placeholder="如：少女阿绾为报灭门之仇，雨夜潜入古堡。第一镜她立于门前深吸一口气；第二镜推门而入，烛火骤明；第三镜与黑袍杀手对峙拔剑……"></textarea>
+    </div>
+
+    <div class="lab-sec" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <input id="plot_style" placeholder="全局风格锚定词（可选，如：国风漫剧、厚涂、冷蓝雨夜）" style="flex:1;min-width:220px" />
+      <select id="plot_split">
+        <option value="blank">拆分：按空行（每段一镜）</option>
+        <option value="line">拆分：按行（每行一镜）</option>
+        <option value="manual">手动添加分镜</option>
+      </select>
+      <button class="btn" id="plot_splitBtn">拆分分镜</button>
+      <button class="btn ghost" id="plot_addBtn">+ 手动加一镜</button>
+      <button class="btn ghost" id="plot_genall">全部 AI 生成</button>
+    </div>
+    <div id="plot_status" style="font-size:12px;color:var(--muted);margin:4px 0"></div>
+
+    <div id="plot_beats"></div>
+
+    <div class="lab-sec" style="display:flex;gap:8px;align-items:center;margin-top:10px">
+      <button class="btn" id="plot_export">导出完整分镜脚本</button>
+    </div>
+    <textarea id="plot_preview" rows="14" readonly style="display:none;width:100%;background:#0a0c12;color:#d7e3f4;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:12px;font-family:monospace;white-space:pre-wrap"></textarea>
+    <button class="btn ghost" id="plot_copy" style="display:none;margin-top:6px;font-size:12px;padding:6px 12px">复制分镜脚本</button>
+  </div>
 </div>
 
 <script>
@@ -849,6 +881,7 @@ document.querySelectorAll(".tab").forEach(t=>{
     $("seq").style.display=which==="seq"?"block":"none";
     $("fight").style.display=which==="fight"?"block":"none";
     $("lab").style.display=which==="lab"?"block":"none";
+    $("plot").style.display=which==="plot"?"block":"none";
   });
 });
 $("addShot").addEventListener("click",()=>addShot());
@@ -923,7 +956,8 @@ const AI_FMTS={
   fight:{json:true,sys:"你是顶尖的 AI 视频分镜提示词专家，熟悉「打斗版切片提示词」结构（基础风格锚定词 + 三切片：0-3s开场对峙 / 中段交手 / 高潮绝杀，每片含镜头、场景、人物A、人物B、动作、特效、音频；末尾负面提示词）。请按用户给的一句话场景，输出 JSON，键为：name,dur(数字),quality,art,scene,a,b,line,cam1,act1,fx1,cam2,act2,fx2,cam3,act3,fx3。只输出 JSON，不要解释。"},
   basicset:{json:false,sys:"你是顶尖的 AI 视频分镜提示词专家，熟悉「基础设定+画面内容」双层模板：先写【基础设定】（锁定角色外观/服装/坐骑/场景/光线/破坏状态/表情机制）+【氛围与画质】，再写【画面内容】（多个片段，每片段含景别/构图/运镜/画面内容），末附负面提示词。请直接输出完整提示词纯文本，不要 JSON，不要解释，不要加 markdown 围栏。"},
   seedance:{json:false,sys:"你是顶尖的 AI 视频分镜提示词专家，熟悉 Seedance 时间码分镜：每镜格式为「镜头 0N【起始s-结束s】景别 / 运镜」+「画面视图：…」+「声音设计：…」，多镜时间码递进。请直接输出完整提示词纯文本，不要 JSON，不要解释，不要加 markdown 围栏。"},
-  innovate:{json:true,sys:"你是顶尖的运镜与视觉特效创新师。用户会给你若干『运镜资源』和『视觉特效资源』作为素材，以及一句话基础场景。请基于这些素材，跨界杂交出一种『全新的运镜+视觉特效组合』，它不应是素材的简单拼接，而要产生 1+1>2 的新效果（例如把A的运镜轨迹与B的特效物理耦合，在某秒触发连锁反应）。输出 JSON，键为：name(给新组合起个酷名),camera(新运镜描述，含时间码与角度),vfx(新特效描述，含触发节点与物理),fusion(一句话说明耦合机制),prompt(可直接使用的完整提示词片段，中文)。只输出 JSON，不要解释。"}
+  innovate:{json:true,sys:"你是顶尖的运镜与视觉特效创新师。用户会给你若干『运镜资源』和『视觉特效资源』作为素材，以及一句话基础场景。请基于这些素材，跨界杂交出一种『全新的运镜+视觉特效组合』，它不应是素材的简单拼接，而要产生 1+1>2 的新效果（例如把A的运镜轨迹与B的特效物理耦合，在某秒触发连锁反应）。输出 JSON，键为：name(给新组合起个酷名),camera(新运镜描述，含时间码与角度),vfx(新特效描述，含触发节点与物理),fusion(一句话说明耦合机制),prompt(可直接使用的完整提示词片段，中文)。只输出 JSON，不要解释。"},
+  plotshot:{json:false,sys:"你是顶尖的 AI 视频分镜提示词专家。用户会给你一段【整体剧情文案】、一个【本镜分镜剧情】（单个镜头的剧情/动作描述）、以及【全局风格锚定】。请只针对这一镜，写出贴合该分镜剧情的【分镜提示词】，严格不添加剧情文案里没有的角色、地点或动作（防止跑偏），只做镜头化转译。提示词用中文，覆盖：主体锁定/动作/镜头运动/景别构图/光影氛围/风格一致性/节奏时长/空间关系，末尾附简短负面提示词。不要输出 JSON，不要解释，不要加 markdown 围栏。"}
 };
 const SINGLE_MAP={subject:"s_subject",action:"s_action",camera:"s_camera",shot:"s_shot",lighting:"s_lighting",style:"s_style",rhythm:"s_rhythm",spatial:"s_spatial",frames:"s_frames",negative:"s_negative",plot:"s_plot"};
 const FIGHT_MAP=["name","dur","quality","art","scene","a","b","line","cam1","act1","fx1","cam2","act2","fx2","cam3","act3","fx3"];
@@ -1043,6 +1077,83 @@ $("lab_innovate").addEventListener("click",()=>{
   runAi(payload,"innovate",$("labStatus"),$("labOut"),null,null,"prompt");
 });
 $("labCopy").addEventListener("click",()=>{ navigator.clipboard.writeText($("labOut").value).then(()=>alert("已复制方案")); });
+
+// ---- 剧情工坊 ----
+function escapeHtml(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function plotAddCard(beat,prompt){
+  const wrap=document.getElementById("plot_beats");
+  const card=document.createElement("div");
+  card.className="plot-card";
+  card.style.cssText="border:1px solid var(--line);border-radius:10px;padding:10px;margin:8px 0;background:var(--panel-2)";
+  card.innerHTML=
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'+
+      '<b style="font-size:12px;color:var(--accent)">分镜</b>'+
+      '<button class="btn ghost p_del" style="font-size:11px;padding:3px 9px">删除</button>'+
+    '</div>'+
+    '<label style="font-size:11px;color:var(--muted)">分镜剧情（这一镜讲什么）</label>'+
+    '<textarea class="p_beat" rows="2" style="width:100%;margin:4px 0;background:#0a0c12;color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:8px;font-size:12px;font-family:inherit">'+escapeHtml(beat)+'</textarea>'+
+    '<div style="display:flex;gap:8px;margin:4px 0">'+
+      '<button class="btn p_gen" style="font-size:12px;padding:5px 12px">AI 生成提示词</button>'+
+      '<span class="p_status" style="font-size:11px;color:var(--muted);align-self:center"></span>'+
+    '</div>'+
+    '<label style="font-size:11px;color:var(--muted)">分镜提示词（按剧情编辑，可直接改）</label>'+
+    '<textarea class="p_prompt" rows="4" style="width:100%;margin-top:4px;background:#0a0c12;color:#d7e3f4;border:1px solid var(--line);border-radius:8px;padding:8px;font-size:12px;font-family:monospace">'+escapeHtml(prompt)+'</textarea>';
+  wrap.appendChild(card);
+  card.querySelector(".p_del").addEventListener("click",()=>{ card.remove(); plotRenumber(); });
+  card.querySelector(".p_gen").addEventListener("click",()=>plotGenCard(card));
+  plotRenumber();
+}
+function plotRenumber(){
+  document.querySelectorAll("#plot_beats .plot-card").forEach((c,i)=>{ c.querySelector("b").textContent="分镜 "+(i+1); });
+}
+function plotSplit(){
+  const txt=$("plot_story").value.trim();
+  const mode=$("plot_split").value;
+  let arr=[];
+  if(mode==="blank") arr=txt.split(/\n\s*\n/).map(s=>s.trim()).filter(Boolean);
+  else if(mode==="line") arr=txt.split(/\n/).map(s=>s.trim()).filter(Boolean);
+  if(!arr.length){ if(!txt){alert("先写剧情文案");return;} arr=[txt]; }
+  document.getElementById("plot_beats").innerHTML="";
+  arr.forEach(b=>plotAddCard(b,""));
+  $("plot_status").textContent="✅ 已拆出 "+arr.length+" 个分镜，点各镜「AI 生成提示词」或「全部 AI 生成」";
+}
+function plotGenCard(card){
+  const story=$("plot_story").value.trim();
+  const style=$("plot_style").value.trim();
+  const beat=card.querySelector(".p_beat").value.trim();
+  if(!beat){ alert("先写这一镜的分镜剧情"); return; }
+  const st=card.querySelector(".p_status");
+  const payload="【整体剧情文案】\n"+(story||"（无整体文案）")+"\n\n【本镜分镜剧情】\n"+beat+"\n\n【全局风格锚定】\n"+(style||"（沿用默认）");
+  runAi(payload,"plotshot",st,card.querySelector(".p_prompt"),null,null);
+}
+function plotGenAll(){
+  const cards=document.querySelectorAll("#plot_beats .plot-card");
+  if(!cards.length){ alert("先拆分分镜"); return; }
+  cards.forEach(c=>plotGenCard(c));
+}
+function plotExport(){
+  const story=$("plot_story").value.trim();
+  const style=$("plot_style").value.trim();
+  const cards=[...document.querySelectorAll("#plot_beats .plot-card")];
+  if(!cards.length){ alert("先拆分分镜"); return; }
+  let out="【剧情文案】\n"+(story||"（未填写）")+"\n\n";
+  if(style) out+="【全局风格锚定】"+style+"\n\n";
+  cards.forEach((c,i)=>{
+    const beat=c.querySelector(".p_beat").value.trim();
+    const prompt=c.querySelector(".p_prompt").value.trim();
+    out+="—— 分镜 "+(i+1)+" ——\n";
+    out+="分镜剧情："+(beat||"（未填）")+"\n";
+    out+="提示词："+(prompt||"（未生成，点该镜「AI 生成提示词」）")+"\n\n";
+  });
+  $("plot_preview").value=out.trim(); $("plot_preview").style.display="block";
+  $("plot_copy").style.display="inline-block";
+  $("plot_status").textContent="✅ 已生成完整分镜脚本，可复制";
+}
+$("plot_splitBtn").addEventListener("click",plotSplit);
+$("plot_addBtn").addEventListener("click",()=>plotAddCard("",""));
+$("plot_genall").addEventListener("click",plotGenAll);
+$("plot_export").addEventListener("click",plotExport);
+$("plot_copy").addEventListener("click",()=>{ navigator.clipboard.writeText($("plot_preview").value).then(()=>alert("已复制分镜脚本")); });
 
 // init
 addShot({subject:"阿绾，黑发及腰、左眼角泪痣，墨色交领长袍，正对镜头立于画面中下",
