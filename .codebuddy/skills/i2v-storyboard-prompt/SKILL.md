@@ -124,6 +124,9 @@ first-frame / reference image of shot N+1.
 - `references/styles_apocalypse.md` — **末日废墟 / 废土** 风格扩展包：核心风格词、光影、细节、
   构图运镜、通用模板、运镜大全、动作库、即梦音效(dB)速查、末日专属负面词、3 分钟分镜范例
   《余烬》。生成时把对应词串填入 10 要素即可。
+- `references/action_cinematic.md` — **动作 / 电影感分镜描述词体系**：镜头运动、景别、动态节奏、
+  视听氛围四大弹药库 + 万能结构模板 + 进阶技巧（静默对比/POV/比喻通感/子弹时间/快速剪辑）+
+  一场完整仓库枪战高潮戏范例。解决「画面描述怎么写才专业」，可直接作为即梦「画面描述」产出标准。
 - `scripts/generate_prompt.py` — deterministic assembler. Reads a JSON of the 10 fields, applies
   vertical logic, and prints a validated prompt. Use for batch or guaranteed completeness.
 - `assets/webapp/index.html` — **零安装网页版 / 单文件 App**：10 要素表单、实时预览、竖屏逻辑
