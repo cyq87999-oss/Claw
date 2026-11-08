@@ -1,0 +1,563 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+    <url>
+        <loc>https://docs.always200.com/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/advanced/context/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/advanced/context/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/advanced/context/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/advanced/tools/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/advanced/tools/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/advanced/tools/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/advanced/variables/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/advanced/variables/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/advanced/variables/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/auxiliary/replicate/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/auxiliary/replicate/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/auxiliary/replicate/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/auxiliary/smart-fill/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/auxiliary/smart-fill/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/auxiliary/smart-fill/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/auxiliary/style-learn/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/auxiliary/style-learn/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/auxiliary/style-learn/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/basic/data/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/basic/data/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/basic/data/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/basic/favorites/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/basic/favorites/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/basic/favorites/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/basic/history/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/basic/history/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/basic/history/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/basic/models/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/basic/models/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/basic/models/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/basic/prompt-garden/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/basic/prompt-garden/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/basic/prompt-garden/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/basic/system-optimization/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/basic/system-optimization/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/basic/system-optimization/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/basic/templates/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/basic/templates/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/basic/templates/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/basic/user-optimization/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/basic/user-optimization/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/basic/user-optimization/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/deployment/desktop/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/deployment/desktop/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/deployment/desktop/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/deployment/docker-advanced/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/deployment/docker-advanced/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/deployment/docker-advanced/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/deployment/docker-basic/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/deployment/docker-basic/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/deployment/docker-basic/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/deployment/docker-troubleshooting/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/deployment/docker-troubleshooting/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/deployment/docker-troubleshooting/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/deployment/extension/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/deployment/extension/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/deployment/extension/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/deployment/web/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/deployment/web/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/deployment/web/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/examples/business-communication/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/examples/business-communication/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/examples/business-communication/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/examples/creative-writing/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/examples/creative-writing/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/examples/creative-writing/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/examples/educational-training/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/examples/educational-training/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/examples/educational-training/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/examples/image-prompt-garden-nb151/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/examples/image-prompt-garden-nb151/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/examples/image-prompt-garden-nb151/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/examples/system-prompt-examples/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/examples/system-prompt-examples/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/examples/system-prompt-examples/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/examples/user-prompt-examples/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/examples/user-prompt-examples/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/examples/user-prompt-examples/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/guide/media/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/guide/media/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/guide/media/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/help/common-questions/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/help/common-questions/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/help/common-questions/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/help/connection-issues/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/help/connection-issues/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/help/connection-issues/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/help/support/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/help/support/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/help/support/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/help/troubleshooting/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/help/troubleshooting/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/help/troubleshooting/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/image/image2image-workspace/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/image/image2image-workspace/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/image/image2image-workspace/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/image/multiimage-workspace/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/image/multiimage-workspace/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/image/multiimage-workspace/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/image/text2image-workspace/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/image/text2image-workspace/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/image/text2image-workspace/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/user/choose-workspace/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/user/choose-workspace/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/user/choose-workspace/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/user/mcp-server/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/user/mcp-server/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/user/mcp-server/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/user/model-testing-strategy/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/user/model-testing-strategy/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/user/model-testing-strategy/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/user/quick-start/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/user/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/user/quick-start/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/user/testing-evaluation/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/user/testing-evaluation/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/user/testing-evaluation/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/advanced/context/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/advanced/context/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/advanced/context/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/advanced/tools/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/advanced/tools/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/advanced/tools/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/advanced/variables/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/advanced/variables/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/advanced/variables/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/auxiliary/replicate/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/auxiliary/replicate/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/auxiliary/replicate/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/auxiliary/smart-fill/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/auxiliary/smart-fill/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/auxiliary/smart-fill/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/auxiliary/style-learn/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/auxiliary/style-learn/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/auxiliary/style-learn/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/basic/data/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/basic/data/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/basic/data/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/basic/favorites/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/basic/favorites/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/basic/favorites/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/basic/history/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/basic/history/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/basic/history/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/basic/models/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/basic/models/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/basic/models/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/basic/prompt-garden/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/basic/prompt-garden/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/basic/prompt-garden/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/basic/system-optimization/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/basic/system-optimization/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/basic/system-optimization/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/basic/templates/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/basic/templates/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/basic/templates/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/basic/user-optimization/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/basic/user-optimization/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/basic/user-optimization/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/deployment/desktop/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/deployment/desktop/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/deployment/desktop/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/deployment/docker-advanced/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/deployment/docker-advanced/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/deployment/docker-advanced/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/deployment/docker-basic/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/deployment/docker-basic/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/deployment/docker-basic/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/deployment/docker-troubleshooting/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/deployment/docker-troubleshooting/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/deployment/docker-troubleshooting/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/deployment/extension/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/deployment/extension/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/deployment/extension/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/deployment/web/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/deployment/web/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/deployment/web/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/examples/business-communication/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/examples/business-communication/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/examples/business-communication/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/examples/creative-writing/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/examples/creative-writing/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/examples/creative-writing/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/examples/educational-training/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/examples/educational-training/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/examples/educational-training/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/examples/image-prompt-garden-nb151/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/examples/image-prompt-garden-nb151/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/examples/image-prompt-garden-nb151/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/examples/system-prompt-examples/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/examples/system-prompt-examples/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/examples/system-prompt-examples/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/examples/user-prompt-examples/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/examples/user-prompt-examples/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/examples/user-prompt-examples/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/guide/media/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/guide/media/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/guide/media/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/help/common-questions/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/help/common-questions/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/help/common-questions/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/help/connection-issues/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/help/connection-issues/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/help/connection-issues/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/help/support/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/help/support/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/help/support/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/help/troubleshooting/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/help/troubleshooting/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/help/troubleshooting/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/image/image2image-workspace/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/image/image2image-workspace/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/image/image2image-workspace/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/image/multiimage-workspace/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/image/multiimage-workspace/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/image/multiimage-workspace/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/image/text2image-workspace/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/image/text2image-workspace/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/image/text2image-workspace/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/user/choose-workspace/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/user/choose-workspace/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/user/choose-workspace/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/user/mcp-server/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/user/mcp-server/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/user/mcp-server/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/user/model-testing-strategy/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/user/model-testing-strategy/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/user/model-testing-strategy/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/user/quick-start/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/user/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/user/quick-start/"/>
+    </url>
+    <url>
+        <loc>https://docs.always200.com/en/user/testing-evaluation/</loc>
+        <lastmod>2026-11-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.always200.com/en/user/testing-evaluation/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.always200.com/user/testing-evaluation/"/>
+    </url>
+</urlset>
