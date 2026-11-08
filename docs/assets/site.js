@@ -33,20 +33,9 @@
   if (header) {
     header.innerHTML =
       '<div class="md-header__inner">' +
-        '<button class="md-header__button" id="drawer-btn" aria-label="打开导航">☰</button>' +
         '<a class="md-header__button md-logo" href="' + base + '"><span class="md-logo-mark">C</span><span>Claw Docs</span></a>' +
         '<div class="md-header__title">创作工作台文档</div>' +
         '<div class="md-header__spacer"></div>' +
-        '<div class="po-header-search">' +
-          '<div class="md-search__form">' +
-            '<span class="md-search__icon">⌕</span>' +
-            '<input class="md-search__input" id="search-input" placeholder="搜索文档…" autocomplete="off" aria-label="搜索文档">' +
-            '<span class="md-search__kbd">/</span>' +
-          '</div>' +
-          '<div class="md-search-result" id="search-result"></div>' +
-        '</div>' +
-        '<a class="md-header__button po-header-link" href="' + base + 'spec/">8 行规格</a>' +
-        '<a class="md-header__button po-header-link po-header-link--primary" href="' + base + 'quick-start/">快速开始</a>' +
         '<button class="md-header__button" id="theme-btn" title="切换亮色 / 深色主题" aria-label="切换主题">◐</button>' +
         '<a class="md-header__button po-header-link" href="https://github.com/cyq87999-oss/Claw" target="_blank" rel="noopener">GitHub</a>' +
       '</div>';
