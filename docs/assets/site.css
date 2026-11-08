@@ -613,7 +613,7 @@ code, pre, kbd { font-family: var(--po-font-mono); }
   .md-typeset .po-docs-link-shelf { grid-template-columns: 1fr; }
 }
 
-/* ---------- 只留 8 行规格 ---------- */
+/* ---------- 90 港风规格 ---------- */
 body[data-page="home"] .md-sidebar { display: none; }
 body[data-page="home"] .md-grid { grid-template-columns: minmax(0, 1fr); max-width: 60rem; }
 .po-spec h1 { font-size: 1.8rem; margin: 0 0 .9rem; }
@@ -628,6 +628,6 @@ body[data-page="home"] .md-grid { grid-template-columns: minmax(0, 1fr); max-wid
   overflow-x: auto;
   font-size: .88rem;
   line-height: 2.1;
-  white-space: pre;
+  white-space: pre-wrap; word-break: break-word;
 }
 .po-spec-code code { padding: 0; border: 0; background: transparent; font-size: inherit; color: var(--po-text); }
