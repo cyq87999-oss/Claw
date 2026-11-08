@@ -612,3 +612,22 @@ code, pre, kbd { font-family: var(--po-font-mono); }
   .md-typeset .po-docs-step-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .md-typeset .po-docs-link-shelf { grid-template-columns: 1fr; }
 }
+
+/* ---------- 只留 8 行规格 ---------- */
+body[data-page="home"] .md-sidebar { display: none; }
+body[data-page="home"] .md-grid { grid-template-columns: minmax(0, 1fr); max-width: 60rem; }
+.po-spec h1 { font-size: 1.8rem; margin: 0 0 .9rem; }
+.po-spec-actions { display: flex; align-items: center; gap: .8rem; margin: 0 0 1rem; }
+.po-spec-state { font-size: .8rem; color: var(--po-muted); }
+.po-spec-code {
+  margin: 0;
+  padding: 1.2rem 1.3rem;
+  border: 1px solid var(--po-code-border);
+  border-radius: .8rem;
+  background: var(--po-code-bg);
+  overflow-x: auto;
+  font-size: .88rem;
+  line-height: 2.1;
+  white-space: pre;
+}
+.po-spec-code code { padding: 0; border: 0; background: transparent; font-size: inherit; color: var(--po-text); }

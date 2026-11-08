@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Claw 创作工作台文档：8 行一镜到底规格、逐镜剧本、视频生成与本地环境">
+  <meta name="description" content="竖屏 9:16 一镜到底 8 行规格">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232563eb'/%3E%3Ctext x='16' y='22' font-size='20' text-anchor='middle' fill='white' font-family='Arial'%3EC%3C/text%3E%3C/svg%3E">
-  <title>Claw 创作工作台文档</title>
+  <title>8 行规格 · Claw Docs</title>
   <link rel="stylesheet" href="./assets/site.css">
   <script>try{var t=localStorage.getItem('claw-docs-theme');if(t)document.documentElement.setAttribute('data-md-color-scheme',t);else if(matchMedia('(prefers-color-scheme: dark)').matches)document.documentElement.setAttribute('data-md-color-scheme','slate')}catch(e){}</script>
 </head>
@@ -17,82 +17,21 @@
       <aside id="site-sidebar" class="md-sidebar md-sidebar--primary"></aside>
       <main class="md-content">
         <article class="md-content__inner md-typeset">
-          <div class="po-docs-home">
-            <section class="po-docs-hero">
-              <div class="po-docs-badge">Claw Creation Docs</div>
-              <div class="po-docs-hero-main">
-                <div class="po-docs-hero-copy">
-                  <h1>从一句剧情，<br>开始第一版分镜</h1>
-                  <p class="po-docs-lead">先跑通本地工作台，填一段剧情，拿到一条固定 8 行的成品提示词。跑通后再看逐镜剧本、视频生成与排障。</p>
-                  <div class="po-docs-actions">
-                    <a class="md-button md-button--primary" href="./quick-start/">从这里开始</a>
-                    <a class="md-button" href="./models/">如何配置模型</a>
-                    <a class="md-button" href="./workspace/">选择工作台</a>
-                  </div>
-                </div>
-                <div class="po-docs-hero-aside">
-                  <div class="po-docs-hero-note"><span>01</span><div><strong>先跑通本地服务</strong><p>8771 代理连上本地模型，页面能正常出词。</p></div></div>
-                  <div class="po-docs-hero-note"><span>02</span><div><strong>拿到第一条 8 行提示词</strong><p>只填本镜剧情，输出无字幕、零硬切的一镜到底。</p></div></div>
-                  <div class="po-docs-hero-note"><span>03</span><div><strong>再接视频生成</strong><p>规格稳定后交给花夕、幕匠或短剧流水线。</p></div></div>
-                </div>
-              </div>
-            </section>
-
-            <section class="po-docs-section">
-              <div class="po-docs-section-head">
-                <h2>第一次使用</h2>
-                <p>快速开始包含从填剧情到复制结果的完整步骤；也可以直接查看模型配置。</p>
-              </div>
-              <div class="po-docs-step-strip">
-                <a class="po-docs-step" href="./quick-start/"><span class="po-docs-step-index">01</span><div><h3>快速开始</h3><p>从填剧情到复制 8 行结果。</p></div></a>
-                <a class="po-docs-step" href="./models/"><span class="po-docs-step-index">02</span><div><h3>模型配置</h3><p>确认 8771 代理与本地模型可用。</p></div></a>
-                <a class="po-docs-step" href="./workspace/"><span class="po-docs-step-index">03</span><div><h3>选择工作台</h3><p>按任务类型选择入口页面。</p></div></a>
-                <a class="po-docs-step" href="./spec/"><span class="po-docs-step-index">04</span><div><h3>8 行规格</h3><p>用逐行对照检验输出是否合格。</p></div></a>
-              </div>
-            </section>
-
-            <section class="po-docs-section">
-              <div class="po-docs-section-head">
-                <h2>按规格进入</h2>
-                <p>不同页面，对应不同的输入结构。</p>
-              </div>
-              <div class="po-docs-index-list">
-                <a class="po-docs-index-row" href="./spec/"><div><h3>8 行一镜到底规格</h3><p>固定画幅、光源、运镜、音效、首尾帧与负面词，逐行写死。</p></div><code>/spec</code></a>
-                <a class="po-docs-index-row" href="./storyboard/"><div><h3>逐镜剧本与情绪弹簧</h3><p>固定字段拆镜，单集只一个主峰值，结尾留扣。</p></div><code>/storyboard</code></a>
-                <a class="po-docs-index-row" href="./workspace/"><div><h3>8 行规格版分镜工作台</h3><p>剧情输入卡片与批量生成，输出即 8 行成品。</p></div><code>/workspace</code></a>
-                <a class="po-docs-index-row" href="./quick-start/"><div><h3>快速开始</h3><p>最短路径跑通一次完整生成。</p></div><code>/quick-start</code></a>
-                <a class="po-docs-index-row" href="./models/"><div><h3>模型配置</h3><p>本地 Ollama 模型与 8771 代理的分工。</p></div><code>/models</code></a>
-                <a class="po-docs-index-row" href="./environment/"><div><h3>本地环境与部署</h3><p>静态服务、端口映射与 GitHub Pages 发布。</p></div><code>/environment</code></a>
-              </div>
-            </section>
-
-            <section class="po-docs-section">
-              <div class="po-docs-section-head">
-                <h2>提示词资产与视频生成</h2>
-                <p>规格稳定后，再沉淀为可复用的资产，接上生成链路。</p>
-              </div>
-              <div class="po-docs-index-list">
-                <a class="po-docs-index-row" href="./video/#huaxi"><div><h3>花夕 Web 生成器</h3><p>Web 视频生成入口，默认可灵 provider。</p></div><code>/video#huaxi</code></a>
-                <a class="po-docs-index-row" href="./video/#mujiang"><div><h3>幕匠创作导演</h3><p>编剧、分镜、出图、生成、合成一条链。</p></div><code>/video#mujiang</code></a>
-                <a class="po-docs-index-row" href="./video/#auto-drama"><div><h3>短剧自动化工厂</h3><p>auto-drama 全自动短剧流水线。</p></div><code>/video#auto-drama</code></a>
-                <a class="po-docs-index-row" href="./video/#comfyui"><div><h3>ComfyUI 与锁脸</h3><p>本地出图、角色 LoRA 与 IPAdapter 资源。</p></div><code>/video#comfyui</code></a>
-                <a class="po-docs-index-row" href="./help/"><div><h3>常见问题</h3><p>页面残留旧提示词、刷新无效、批量卡顿。</p></div><code>/help</code></a>
-              </div>
-            </section>
-
-            <section class="po-docs-section">
-              <div class="po-docs-section-head">
-                <h2>继续深入</h2>
-                <p>跑通第一次使用后，再看部署、排障和规格对照。</p>
-              </div>
-              <div class="po-docs-link-shelf">
-                <a class="po-docs-link-tile" href="./environment/#pages"><div class="po-docs-link-meta">部署</div><h3>GitHub Pages 发布</h3><p>零依赖静态站，直接托管 docs 目录。</p></a>
-                <a class="po-docs-link-tile" href="./help/#stale"><div class="po-docs-link-meta">排障</div><h3>页面残留旧内容</h3><p>旧缓存与旧提示词回填的定位顺序。</p></a>
-                <a class="po-docs-link-tile" href="./spec/#lines"><div class="po-docs-link-meta">规格</div><h3>8 行逐行对照</h3><p>每写什么、禁止写什么，一行一条。</p></a>
-              </div>
-            </section>
+          <div class="po-spec">
+            <h1>8 行规格</h1>
+            <div class="po-spec-actions">
+              <button type="button" id="copy-spec" class="md-button md-button--primary">复制 8 行</button>
+              <span id="copy-state" class="po-spec-state"></span>
+            </div>
+            <pre class="po-spec-code"><code id="spec-text">竖屏 9:16 一镜到底 全程无字幕 零硬切零转场零分镜切点
+胶片颗粒天气晴朗 暖黄色光源从高处洒下 运动模糊中物体轻微抖动
+手持动态追踪·纪实 微震动幅度 35mm 持续匀速平移
+滑稽滑音 @ 0.0s 128dB
+古旧青瓦屋顶 范富贵（青年男性，汉服）位于构图顶部三分线外 景别远景 仅主体和屋顶轮廓可见
+范富贵站立→脚下打滑→身体姿态滑稽 速度中等 结束无环境破坏
+首帧：范富贵凌空站立的滑稽剪影 尾帧：范富贵滑倒过程的持续晃动轨迹
+负面提示词：瞳孔收缩 肌肉收紧 尘埃浮动</code></pre>
           </div>
-          <div class="md-footnote">Claw 创作工作台文档 · 零依赖静态站 · 内容随仓库更新</div>
         </article>
         <nav id="site-pager" class="md-footer-nav"></nav>
       </main>
@@ -102,5 +41,24 @@
   <button id="site-top" class="md-top" title="回到页面顶部" aria-label="回到顶部">↑</button>
   <script src="./assets/nav.js"></script>
   <script src="./assets/site.js"></script>
+  <script>
+    (function () {
+      var btn = document.getElementById('copy-spec');
+      var state = document.getElementById('copy-state');
+      var text = document.getElementById('spec-text').textContent;
+      btn.addEventListener('click', function () {
+        function done() { state.textContent = '已复制'; setTimeout(function () { state.textContent = ''; }, 1600); }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(done, function () { fallback(); });
+        } else { fallback(); }
+        function fallback() {
+          var ta = document.createElement('textarea');
+          ta.value = text; document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); done(); } catch (e) {}
+          document.body.removeChild(ta);
+        }
+      });
+    })();
+  </script>
 </body>
 </html>
