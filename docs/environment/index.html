@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="zh-CN" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="本地环境与部署：8771 服务拓扑、静态站预览与 GitHub Pages 发布">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232563eb'/%3E%3Ctext x='16' y='22' font-size='20' text-anchor='middle' fill='white' font-family='Arial'%3EC%3C/text%3E%3C/svg%3E">
+  <title>本地环境与部署 · Claw 创作工作台文档</title>
+  <link rel="stylesheet" href="../assets/site.css">
+  <script>try{var t=localStorage.getItem("claw-docs-theme");if(t)document.documentElement.setAttribute("data-md-color-scheme",t);else if(matchMedia("(prefers-color-scheme: dark)").matches)document.documentElement.setAttribute("data-md-color-scheme","slate")}catch(e){}</script>
+</head>
+<body data-base="../" data-page="environment">
+  <header id="site-header" class="md-header"></header>
+  <div class="md-mask" id="site-mask"></div>
+  <div class="md-main">
+    <div class="md-grid">
+      <aside id="site-sidebar" class="md-sidebar md-sidebar--primary"></aside>
+      <main class="md-content">
+        <article class="md-content__inner md-typeset">
+          <h1>本地环境与部署</h1>
+          <p>这里有两条独立的链路：工作台走本机 <code>8771</code> 代理，这份文档站是纯静态文件，不依赖任何构建工具。</p>
+
+          <h2 id="topology">本机拓扑</h2>
+          <table>
+            <thead><tr><th>组件</th><th>位置 / 端口</th><th>说明</th></tr></thead>
+            <tbody>
+              <tr><td>静态 + 代理服务</td><td><code>/Users/qy/Desktop/server_proxy.py</code> : <code>8771</code></td><td>静态根为 Desktop，<code>/</code> → <code>prompt_studio.html</code></td></tr>
+              <tr><td>本地模型</td><td><code>http://localhost:11434</code></td><td>经 <code>/ollama/*</code> 转发</td></tr>
+              <tr><td>云端模型接口</td><td><code>https://ollama.com</code></td><td>经 <code>/ollamacloud/*</code> 转发</td></tr>
+              <tr><td>文档站</td><td>仓库 <code>docs/</code></td><td>HTML + CSS + JS，零外链、零依赖</td></tr>
+            </tbody>
+          </table>
+          <p>模型清单与验证顺序见 <a href="../models/">模型配置</a>。</p>
+
+          <h2 id="preview">本地预览文档站</h2>
+          <pre><code>cd /Users/qy/CodeBuddy/Claw
+python3 -m http.server 8788 --directory docs</code></pre>
+          <p>然后打开 <code>http://127.0.0.1:8788/</code>。页面链接全部使用相对路径，直接从子目录起服务或部署到 GitHub Pages 项目子路径都能正常跳转。</p>
+          <div class="po-warn"><span class="t">资源纪律</span>预览服务是轻量静态服务，用完即停；打碟（Pioneer DJ）时不要启动任何后台重进程，也不要自动拉起网关、模型服务或训练任务。</div>
+
+          <h2 id="pages">GitHub Pages 发布</h2>
+          <p>仓库已配置 Pages 工作流：推送 <code>main</code> 且 <code>docs/**</code> 有变更时自动部署 <code>docs/</code> 目录。</p>
+          <ol>
+            <li>把 <code>docs/</code> 提交并推到 <code>origin/main</code>。</li>
+            <li>在仓库 Settings → Pages 里把 Source 设为 <strong>GitHub Actions</strong>（工作流文件在 <code>.github/workflows/pages.yml</code>）。</li>
+            <li>工作流跑完后得到 <code>https://cyq87999-oss.github.io/Claw/</code> 形式的地址。</li>
+          </ol>
+          <p>因为站点零构建、零依赖，也可以在 Settings → Pages 里直接选 <code>main</code> + <code>/docs</code> 发布，不需要装 MkDocs 或 Node。</p>
+
+          <h2 id="tree">目录结构</h2>
+          <pre><code>docs/
+├── index.html                 首页
+├── assets/
+│   ├── site.css               全站样式（亮 / 暗）
+│   ├── site.js                顶栏、导航、目录、搜索
+│   └── nav.js                 导航与搜索索引（唯一数据源）
+├── quick-start/               快速开始
+├── models/                    模型配置
+├── workspace/                 选择工作台
+├── spec/                      8 行一镜到底规格
+├── storyboard/                逐镜剧本与情绪弹簧
+├── video/                     生成工具总览
+├── environment/               本页
+└── help/                      常见问题
+.github/workflows/pages.yml    Pages 自动部署</code></pre>
+          <p>新增栏目：在 <code>docs/assets/nav.js</code> 里各加一条导航与搜索索引，再按现有页面模板复制一份 <code>index.html</code> 即可。</p>
+        </article>
+        <nav id="site-pager" class="md-footer-nav"></nav>
+      </main>
+      <aside id="site-toc" class="md-sidebar md-sidebar--secondary"></aside>
+    </div>
+  </div>
+  <button id="site-top" class="md-top" title="回到页面顶部" aria-label="回到顶部">↑</button>
+  <script src="../assets/nav.js"></script>
+  <script src="../assets/site.js"></script>
+</body>
+</html>
